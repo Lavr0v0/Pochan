@@ -40,4 +40,15 @@ body {
   font-family: var(--font-family);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* 移动端：禁止文本选择拖拽干扰触摸交互 */
+  -webkit-user-select: none;
+  user-select: none;
+  /* 移动端：禁止下拉刷新 */
+  overscroll-behavior: none;
+}
+
+/* 允许输入框和文本区域选择文本 */
+input, textarea, [contenteditable] {
+  -webkit-user-select: text;
+  user-select: text;
 }

@@ -5,7 +5,7 @@
  * 左侧：功能面板（番剧库 / 日历 / 设置 切换）
  */
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { useAnimeStore } from './store/useAnimeStore';
 import { BubbleCanvas } from './components/BubbleCanvas';
@@ -19,6 +19,19 @@ import type { TrackedAnime } from './types';
 import './App.css';
 
 type PanelTab = 'library' | 'calendar' | 'settings';
+type MobileTab = 'bubble' | 'library' | 'calendar' | 'settings';
+
+/** 检测是否为移动端视口 */
+function useIsMobile(): boolean {
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 768);
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 768px)');
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
+  return isMobile;
+}
 
 /** 兼容旧数据 */
 function isWatching(a: TrackedAnime): boolean {
@@ -27,7 +40,9 @@ function isWatching(a: TrackedAnime): boolean {
 
 function App(): JSX.Element {
   const [panelTab, setPanelTab] = useState<PanelTab>('library');
+  const [mobileTab, setMobileTab] = useState<MobileTab>('bubble');
   const [addOpen, setAddOpen] = useState(false);
+  const isMobile = useIsMobile();
   const isLoaded = useAnimeStore((s) => s.isLoaded);
   const loadFromDisk = useAnimeStore((s) => s.loadFromDisk);
   const animes = useAnimeStore((s) => s.animes);
@@ -38,6 +53,14 @@ function App(): JSX.Element {
   useEffect(() => {
     void loadFromDisk();
   }, [loadFromDisk]);
+
+  /** 移动端切换 tab 时同步 panelTab */
+  const handleMobileTabChange = useCallback((tab: MobileTab) => {
+    setMobileTab(tab);
+    if (tab !== 'bubble') {
+      setPanelTab(tab);
+    }
+  }, []);
 
   if (!isLoaded) {
     return <div className="app__loading">加载中…</div>;
@@ -86,8 +109,8 @@ function App(): JSX.Element {
 
   return (
     <div className="app">
-      {/* 左侧面板 */}
-      <div className="app__panel">
+      {/* 左侧面板（移动端：非 bubble tab 时显示） */}
+      <div className={`app__panel${isMobile && mobileTab === 'bubble' ? ' app__panel--hidden' : ''}`}>
         <div className="app__panel-tabs">
           <button
             className={`app__panel-tab ${panelTab === 'library' ? 'app__panel-tab--active' : ''}`}
@@ -115,8 +138,8 @@ function App(): JSX.Element {
         </div>
       </div>
 
-      {/* 右侧气泡画布 */}
-      <div className="app__canvas">
+      {/* 右侧气泡画布（移动端：仅 bubble tab 时显示） */}
+      <div className={`app__canvas${isMobile && mobileTab !== 'bubble' ? ' app__canvas--hidden' : ''}`}>
         <BubbleCanvas
           animes={watchingAnimes}
           onBubbleClick={handleBubbleClick}
@@ -132,6 +155,38 @@ function App(): JSX.Element {
           +
         </button>
       </div>
+
+      {/* 移动端底部导航 */}
+      <nav className="app__bottom-nav" aria-label="底部导航">
+        <button
+          className={`app__bottom-nav-item${mobileTab === 'bubble' ? ' app__bottom-nav-item--active' : ''}`}
+          onClick={() => handleMobileTabChange('bubble')}
+        >
+          <span className="app__bottom-nav-icon" aria-hidden="true">🫧</span>
+          <span className="app__bottom-nav-label">气泡</span>
+        </button>
+        <button
+          className={`app__bottom-nav-item${mobileTab === 'library' ? ' app__bottom-nav-item--active' : ''}`}
+          onClick={() => handleMobileTabChange('library')}
+        >
+          <span className="app__bottom-nav-icon" aria-hidden="true">📚</span>
+          <span className="app__bottom-nav-label">番剧库</span>
+        </button>
+        <button
+          className={`app__bottom-nav-item${mobileTab === 'calendar' ? ' app__bottom-nav-item--active' : ''}`}
+          onClick={() => handleMobileTabChange('calendar')}
+        >
+          <span className="app__bottom-nav-icon" aria-hidden="true">📅</span>
+          <span className="app__bottom-nav-label">日历</span>
+        </button>
+        <button
+          className={`app__bottom-nav-item${mobileTab === 'settings' ? ' app__bottom-nav-item--active' : ''}`}
+          onClick={() => handleMobileTabChange('settings')}
+        >
+          <span className="app__bottom-nav-icon" aria-hidden="true">⚙️</span>
+          <span className="app__bottom-nav-label">设置</span>
+        </button>
+      </nav>
 
       {/* 全局弹窗 */}
       {addOpen && (

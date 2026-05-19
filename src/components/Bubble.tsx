@@ -11,7 +11,7 @@
  */
 
 import { forwardRef, memo, useCallback, useRef, useState } from 'react';
-import type { CSSProperties, MouseEvent } from 'react';
+import type { CSSProperties, MouseEvent, TouchEvent } from 'react';
 
 import type { TrackedAnime } from '../types';
 import './bubble.css';
@@ -34,16 +34,25 @@ function pickFallbackChar(anime: TrackedAnime): string {
 }
 
 const CLICK_FEEDBACK_MS = 200;
+/** 长按阈值（ms）：超过此时间视为右键操作 */
+const LONG_PRESS_MS = 500;
 
 const BubbleImpl = forwardRef<HTMLDivElement, BubbleProps>(function Bubble(props, ref) {
   const { anime, radius, opacity, bgColor, textColor } = props;
   const [imgFailed, setImgFailed] = useState(false);
   const activeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const longPressTriggeredRef = useRef(false);
 
   const handleImgError = useCallback(() => setImgFailed(true), []);
 
   const handleClick = useCallback(
     (event: MouseEvent<HTMLDivElement>) => {
+      // 如果刚触发了长按，忽略这次 click
+      if (longPressTriggeredRef.current) {
+        longPressTriggeredRef.current = false;
+        return;
+      }
       const el = event.currentTarget;
       el.classList.add('is-active');
       if (activeTimerRef.current !== null) clearTimeout(activeTimerRef.current);
@@ -67,6 +76,39 @@ const BubbleImpl = forwardRef<HTMLDivElement, BubbleProps>(function Bubble(props
     },
     [anime.id, props],
   );
+
+  // 长按触摸支持（移动端替代右键）
+  const handleTouchStart = useCallback(
+    (event: TouchEvent<HTMLDivElement>) => {
+      longPressTriggeredRef.current = false;
+      const touch = event.touches[0];
+      if (!touch) return;
+      const x = touch.clientX;
+      const y = touch.clientY;
+      longPressTimerRef.current = setTimeout(() => {
+        longPressTriggeredRef.current = true;
+        // 触觉反馈（如果浏览器支持）
+        if (navigator.vibrate) navigator.vibrate(30);
+        props.onContextMenu?.(anime.id, x, y);
+      }, LONG_PRESS_MS);
+    },
+    [anime.id, props],
+  );
+
+  const handleTouchEnd = useCallback(() => {
+    if (longPressTimerRef.current !== null) {
+      clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+  }, []);
+
+  const handleTouchMove = useCallback(() => {
+    // 手指移动了，取消长按
+    if (longPressTimerRef.current !== null) {
+      clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+  }, []);
 
   // 环形进度条计算
   const diameter = radius * 2 + 8; // 比气泡大 8px（4px 每边）
@@ -98,6 +140,9 @@ const BubbleImpl = forwardRef<HTMLDivElement, BubbleProps>(function Bubble(props
       onClick={handleClick}
       onDoubleClick={handleDoubleClick}
       onContextMenu={handleContextMenu}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+      onTouchMove={handleTouchMove}
     >
       {/* 封面 */}
       {showFallback ? (
