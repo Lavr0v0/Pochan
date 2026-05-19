@@ -57,11 +57,38 @@ function App(): JSX.Element {
     void loadFromDisk();
   }, [loadFromDisk]);
 
-  // 数据加载完成后检查今日更新通知
+  // 数据加载完成后：刷新放送状态 + 检查今日更新通知
   useEffect(() => {
-    if (isLoaded && animes.length > 0) {
-      void checkAndNotifyTodayAiring(animes);
+    if (!isLoaded || animes.length === 0) return;
+
+    // 根据 airDate + totalEpisodes 重新计算每部番的放送状态
+    const now = new Date();
+    const todayStr = now.toISOString().slice(0, 10);
+
+    for (const anime of animes) {
+      if (!anime.airDate) continue; // 没有开播日期的跳过，保持原状态
+
+      let correctStatus: 'airing' | 'finished' | 'upcoming';
+
+      if (anime.airDate > todayStr) {
+        // 还没开播
+        correctStatus = 'upcoming';
+      } else if (anime.totalEpisodes > 0) {
+        // 有总集数：估算结束日 = 开播日 + 总集数 × 7天
+        const startDate = new Date(anime.airDate);
+        const estimatedEnd = new Date(startDate.getTime() + anime.totalEpisodes * 7 * 24 * 60 * 60 * 1000);
+        correctStatus = now < estimatedEnd ? 'airing' : 'finished';
+      } else {
+        // 总集数未知 + 已开播 + 有 airDay → 连载中
+        correctStatus = anime.airDay !== undefined ? 'airing' : 'finished';
+      }
+
+      if (anime.status !== correctStatus) {
+        updateAnime(anime.id, { status: correctStatus });
+      }
     }
+
+    void checkAndNotifyTodayAiring(animes);
   }, [isLoaded]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /** 移动端切换 tab 时同步 panelTab */

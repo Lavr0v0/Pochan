@@ -356,6 +356,7 @@ export function bangumiSubjectToTrackedAnime(
 
   if (airDay !== undefined) tracked.airDay = airDay;
   if (form.airTime !== undefined) tracked.airTime = form.airTime;
+  if (subject.air_date) tracked.airDate = subject.air_date;
   if (form.goal !== undefined) tracked.goal = form.goal;
   if (form.color !== undefined) tracked.color = form.color;
   if (form.notes !== undefined) tracked.notes = form.notes;
@@ -474,6 +475,7 @@ export async function importFromBangumi(username: string): Promise<TrackedAnime[
       } as BangumiSubject),
       watchStatus,
       airDay,
+      airDate: subject.air_date || undefined,
       summary: subject.summary ?? undefined,
     };
   });

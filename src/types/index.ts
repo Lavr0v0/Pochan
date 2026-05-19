@@ -74,6 +74,8 @@ export interface TrackedAnime {
   airDay?: number;
   /** "HH:mm" */
   airTime?: string;
+  /** 开播日期 ISO "YYYY-MM-DD"（来自 Bangumi air_date） */
+  airDate?: string;
 
   // —— 老番专属：观影目标 ——
   goal?: AnimeGoal;
