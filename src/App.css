@@ -139,39 +139,35 @@
   position: relative;
 }
 
-/* FAB 添加按钮 */
+/* FAB 添加按钮（桌面端：pill button） */
 .app__fab {
   position: absolute;
   bottom: 24px;
   right: 24px;
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
+  padding: 10px 18px;
+  border-radius: 20px;
   border: none;
   background-color: var(--color-text);
   color: var(--color-bg);
-  font-size: 1.8rem;
-  font-weight: 300;
+  font-size: 0.82rem;
+  font-weight: 500;
+  font-family: var(--font-sans);
   cursor: pointer;
-  box-shadow:
-    0 4px 16px rgba(42, 39, 35, 0.2),
-    0 8px 32px rgba(42, 39, 35, 0.1);
+  box-shadow: var(--shadow-floating);
   transition: transform 150ms ease, box-shadow 150ms ease;
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 6px;
   z-index: 100;
 }
 
 .app__fab:hover {
-  transform: scale(1.08);
-  box-shadow:
-    0 6px 20px rgba(42, 39, 35, 0.25),
-    0 12px 40px rgba(42, 39, 35, 0.15);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-floating);
 }
 
 .app__fab:active {
-  transform: scale(0.95);
+  transform: translateY(0);
 }
 
 /* ---------------------------------------------------------------------------
@@ -244,13 +240,12 @@
     display: none;
   }
 
-  /* FAB 上移，避免被底部导航遮挡 */
+  /* FAB 移动端保持紧凑 */
   .app__fab {
     bottom: 20px;
     right: 20px;
-    width: 48px;
-    height: 48px;
-    font-size: 1.5rem;
+    padding: 10px 14px;
+    font-size: 0.78rem;
   }
 
   /* 底部导航栏 */

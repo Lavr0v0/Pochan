@@ -217,7 +217,7 @@ function App(): JSX.Element {
           onClick={() => setAddOpen(true)}
           aria-label="添加番剧"
         >
-          +
+          ＋ 添加番剧
         </button>
       </div>
       </div>

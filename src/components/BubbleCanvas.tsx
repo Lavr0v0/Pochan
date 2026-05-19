@@ -540,6 +540,12 @@ export function BubbleCanvas(props: BubbleCanvasProps): JSX.Element {
 
   return (
     <div ref={containerRef} className="bubble-canvas">
+      {animes.length === 0 && (
+        <div className="bubble-canvas__empty">
+          <p className="bubble-canvas__empty-title">还没有正在看的番</p>
+          <p className="bubble-canvas__empty-hint">添加一部番后，它会出现在这里。<br/>点击气泡可以记录一集。</p>
+        </div>
+      )}
       {animes.map((anime) => {
         const staleness = computeFrequencyStaleness(now, anime.addedAt, anime.watchedEpisodes);
         const radius = computeBubbleRadius(anime.watchedEpisodes, staleness);

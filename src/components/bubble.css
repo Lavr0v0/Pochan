@@ -24,12 +24,9 @@
   transition: opacity 300ms ease, box-shadow 300ms ease;
   will-change: transform;
 
-  /* 玻璃质感 */
+  /* 轻微阴影，不要玻璃拟态 */
   background: var(--bubble-bg, #CECBF6);
-  box-shadow:
-    0 4px 16px rgba(42, 39, 35, 0.12),
-    inset 0 2px 8px rgba(255, 255, 255, 0.3),
-    0 0 0 2px rgba(255, 255, 255, 0.4);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   opacity: var(--bubble-opacity, 1);
 
   /* 内容布局 */
@@ -40,11 +37,8 @@
 }
 
 .bubble:hover {
-  box-shadow:
-    0 6px 24px rgba(42, 39, 35, 0.18),
-    inset 0 2px 8px rgba(255, 255, 255, 0.4),
-    0 0 0 3px rgba(255, 255, 255, 0.6);
-  transform: translate(var(--bubble-x, 0px), var(--bubble-y, 0px)) scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  transform: translate(var(--bubble-x, 0px), var(--bubble-y, 0px)) scale(1.03);
 }
 
 /* 点击反馈 */
@@ -54,7 +48,7 @@
 
 @keyframes bubble-pop {
   0% { transform: translate(var(--bubble-x, 0px), var(--bubble-y, 0px)) scale(1); }
-  40% { transform: translate(var(--bubble-x, 0px), var(--bubble-y, 0px)) scale(1.15); }
+  45% { transform: translate(var(--bubble-x, 0px), var(--bubble-y, 0px)) scale(1.08); }
   100% { transform: translate(var(--bubble-x, 0px), var(--bubble-y, 0px)) scale(1); }
 }
 
@@ -167,30 +161,42 @@
   transition: stroke-dashoffset 400ms ease;
 }
 
-/* 悬停 tooltip（名字 + 进度） */
+/* 悬停 tooltip */
 .bubble__tooltip {
   position: absolute;
   bottom: calc(100% + 10px);
   left: 50%;
   transform: translateX(-50%);
-  padding: 6px 12px;
-  background: rgba(42, 39, 35, 0.88);
-  color: white;
-  font-size: 0.78rem;
-  font-weight: 500;
-  border-radius: 6px;
+  padding: 6px 10px;
+  background: var(--color-text, #2A2723);
+  color: var(--color-bg, #FAF7F2);
+  font-size: 0.72rem;
+  border-radius: var(--radius-sm, 6px);
   white-space: nowrap;
   pointer-events: none;
   opacity: 0;
   transition: opacity 150ms ease;
-  backdrop-filter: blur(4px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
 }
 
 .bubble:hover .bubble__tooltip {
   opacity: 1;
 }
 
+.bubble__tooltip-name {
+  font-weight: 600;
+}
+
 .bubble__tooltip-progress {
-  opacity: 0.7;
-  margin-left: 6px;
+  opacity: 0.8;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.7rem;
+}
+
+.bubble__tooltip-meta {
+  opacity: 0.6;
+  font-size: 0.65rem;
 }

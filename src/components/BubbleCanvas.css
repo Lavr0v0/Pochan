@@ -15,3 +15,27 @@
     radial-gradient(circle at 80% 70%, rgba(160, 140, 200, 0.06), transparent 40%),
     radial-gradient(circle at 50% 50%, rgba(120, 180, 160, 0.05), transparent 50%);
 }
+
+/* 空状态 */
+.bubble-canvas__empty {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  pointer-events: none;
+}
+
+.bubble-canvas__empty-title {
+  margin: 0 0 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--color-text-soft);
+}
+
+.bubble-canvas__empty-hint {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  line-height: 1.6;
+}
