@@ -310,7 +310,7 @@ function ModalContent(props: ModalContentProps): JSX.Element {
             <span
               className={`anime-detail-modal__status-badge anime-detail-modal__status-badge--${anime.status}`}
             >
-              {anime.status === 'airing' ? '新番' : '老番'}
+              {anime.status === 'airing' ? '连载中' : anime.status === 'upcoming' ? '未开播' : '已完结'}
             </span>
           </div>
 
@@ -385,6 +385,32 @@ function ModalContent(props: ModalContentProps): JSX.Element {
                 >
                   +
                 </button>
+              </div>
+            </section>
+
+            {/* 追番状态切换 */}
+            <section className="anime-detail-modal__field">
+              <span className="anime-detail-modal__field-label">追番状态</span>
+              <div className="anime-detail-modal__status-switcher">
+                {(['watching', 'plan', 'completed', 'dropped'] as const).map((s) => {
+                  const labels: Record<string, string> = {
+                    watching: '在看',
+                    plan: '想看',
+                    completed: '看完',
+                    dropped: '弃番',
+                  };
+                  const current = anime.watchStatus ?? 'watching';
+                  return (
+                    <button
+                      key={s}
+                      type="button"
+                      className={`anime-detail-modal__status-btn${current === s ? ' anime-detail-modal__status-btn--active' : ''}`}
+                      onClick={() => updateAnime(anime.id, { watchStatus: s })}
+                    >
+                      {labels[s]}
+                    </button>
+                  );
+                })}
               </div>
             </section>
 

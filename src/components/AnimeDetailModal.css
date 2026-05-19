@@ -404,3 +404,33 @@
   display: flex;
   gap: 8px;
 }
+
+/* 追番状态切换 */
+.anime-detail-modal__status-switcher {
+  display: flex;
+  gap: 4px;
+}
+
+.anime-detail-modal__status-btn {
+  padding: 5px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-bg);
+  color: var(--color-text-soft);
+  font-family: inherit;
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: background-color 100ms ease, color 100ms ease;
+}
+
+.anime-detail-modal__status-btn:hover {
+  background-color: var(--color-bg-surface-hover, var(--color-bg-soft));
+  color: var(--color-text);
+}
+
+.anime-detail-modal__status-btn--active {
+  background-color: var(--color-accent-soft);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  font-weight: 600;
+}

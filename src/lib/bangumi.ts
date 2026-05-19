@@ -196,12 +196,30 @@ export function inferStatus(subject: BangumiSubject): 'airing' | 'finished' | 'u
     return 'upcoming';
   }
 
-  // 有有效的 air_weekday → 连载中（不管多老，只要还在更新就是 airing）
+  // 没有开播日期 → 已完结（无法判断）
+  if (!subject.air_date) {
+    return 'finished';
+  }
+
+  // 有 air_weekday 且总集数已知：检查是否已经播完
+  // 估算结束日期 = 开播日 + 总集数 * 7 天
   if (Number.isInteger(subject.air_weekday) && subject.air_weekday >= 1 && subject.air_weekday <= 7) {
+    const totalEps = subject.total_episodes || subject.eps || 0;
+    if (totalEps > 0) {
+      const startDate = new Date(subject.air_date);
+      const estimatedEnd = new Date(startDate.getTime() + totalEps * 7 * 24 * 60 * 60 * 1000);
+      const now = new Date();
+      if (now < estimatedEnd) {
+        return 'airing';
+      }
+      // 已经超过预计结束日期 → 完结
+      return 'finished';
+    }
+    // 总集数未知但有 air_weekday → 可能是长篇连载（如海贼王）
     return 'airing';
   }
 
-  // 其他情况 → 已完结
+  // 没有 air_weekday → 已完结
   return 'finished';
 }
 
