@@ -301,17 +301,13 @@ export function SettingsView(): JSX.Element {
     <div className="settings-view">
       <header className="settings-view__header">
         <h1 className="settings-view__title">设置</h1>
-        <p className="settings-view__subtitle">本地数据的备份与维护</p>
       </header>
 
       <div className="settings-view__body">
         <div className="settings-view__inner">
-          {/* —— 外观主题 —— */}
-          <section className="settings-view__card" aria-label="外观主题">
+          {/* —— 外观 —— */}
+          <section className="settings-view__card" aria-label="外观">
             <h2 className="settings-view__card-heading">外观</h2>
-            <p className="settings-view__card-desc">
-              选择应用的颜色模式。特殊主题通过追番成就解锁。
-            </p>
             <div className="settings-view__theme-options" role="radiogroup" aria-label="主题选择">
               <button
                 type="button"
@@ -347,7 +343,7 @@ export function SettingsView(): JSX.Element {
                     }
                     onClick={() => isUnlocked && handleThemeChange(t)}
                     disabled={!isUnlocked}
-                    title={isUnlocked ? labels[t] : `🔒 ${THEME_UNLOCK_CONDITIONS[t]}`}
+                    title={isUnlocked ? labels[t] : THEME_UNLOCK_CONDITIONS[t]}
                   >
                     {isUnlocked ? labels[t] : '???'}
                   </button>
@@ -356,44 +352,17 @@ export function SettingsView(): JSX.Element {
             </div>
           </section>
 
-          {/* —— 数据导出 —— */}
-          <section className="settings-view__card" aria-label="数据导出">
-            <h2 className="settings-view__card-heading">数据导出</h2>
+          {/* —— Bangumi —— */}
+          <section className="settings-view__card" aria-label="Bangumi">
+            <h2 className="settings-view__card-heading">Bangumi 导入</h2>
             <p className="settings-view__card-desc">
-              将当前 {animeCount} 部追番记录导出为 JSON 文件，作为备份或迁移到其他设备使用。
-            </p>
-            <div className="settings-view__actions">
-              <button
-                type="button"
-                className="settings-view__button settings-view__button--primary"
-                onClick={handleExport}
-                disabled={exporting}
-              >
-                {exporting ? '正在导出…' : '导出 JSON'}
-              </button>
-            </div>
-            {exportStatus && (
-              <p
-                className={`settings-view__status settings-view__status--${exportStatus.kind}`}
-                role={exportStatus.kind === 'error' ? 'alert' : 'status'}
-              >
-                {exportStatus.text}
-              </p>
-            )}
-          </section>
-
-          {/* —— 从 Bangumi 导入 —— */}
-          <section className="settings-view__card" aria-label="从 Bangumi 导入">
-            <h2 className="settings-view__card-heading">从 Bangumi 导入</h2>
-            <p className="settings-view__card-desc">
-              输入 Bangumi 用户名，一键导入你的追番列表（公开收藏，无需登录）。
-              导入的番剧会<strong>追加</strong>到现有数据中（不会覆盖已有的番）。
+              输入公开 Bangumi 用户名，导入收藏列表。导入会追加到当前数据，不会覆盖已有记录。
             </p>
             <div className="settings-view__actions">
               <input
                 type="text"
                 className="settings-view__input"
-                placeholder="Bangumi 用户名或 UID"
+                placeholder="用户名或 UID"
                 value={bangumiUsername}
                 onChange={(e) => setBangumiUsername(e.target.value)}
                 disabled={bangumiImporting}
@@ -404,7 +373,7 @@ export function SettingsView(): JSX.Element {
                 onClick={handleBangumiImport}
                 disabled={bangumiImporting || bangumiUsername.trim().length === 0}
               >
-                {bangumiImporting ? '导入中…' : '导入'}
+                {bangumiImporting ? '导入中…' : '导入 Bangumi 收藏'}
               </button>
             </div>
             {bangumiStatus && (
@@ -417,22 +386,38 @@ export function SettingsView(): JSX.Element {
             )}
           </section>
 
-          {/* —— 数据导入 —— */}
-          <section className="settings-view__card" aria-label="数据导入">
-            <h2 className="settings-view__card-heading">数据导入</h2>
+          {/* —— 数据 —— */}
+          <section className="settings-view__card" aria-label="数据">
+            <h2 className="settings-view__card-heading">数据</h2>
             <p className="settings-view__card-desc">
-              从 JSON 文件恢复追番数据。导入会<strong>替换</strong>当前所有数据，请先确认已做好备份。
+              数据只保存在本机。导出的 JSON 可用于备份或迁移。当前共 {animeCount} 部番剧。
             </p>
             <div className="settings-view__actions">
+              <button
+                type="button"
+                className="settings-view__button settings-view__button--primary"
+                onClick={handleExport}
+                disabled={exporting}
+              >
+                {exporting ? '正在导出…' : '导出备份'}
+              </button>
               <button
                 type="button"
                 className="settings-view__button"
                 onClick={handleImport}
                 disabled={importing}
               >
-                {importing ? '正在导入…' : '导入 JSON'}
+                {importing ? '正在导入…' : '恢复备份'}
               </button>
             </div>
+            {exportStatus && (
+              <p
+                className={`settings-view__status settings-view__status--${exportStatus.kind}`}
+                role={exportStatus.kind === 'error' ? 'alert' : 'status'}
+              >
+                {exportStatus.text}
+              </p>
+            )}
             {importStatus && (
               <p
                 className={`settings-view__status settings-view__status--${importStatus.kind}`}
@@ -441,14 +426,9 @@ export function SettingsView(): JSX.Element {
                 {importStatus.text}
               </p>
             )}
-          </section>
 
-          {/* —— 清空全部数据 —— */}
-          <section className="settings-view__card" aria-label="清空全部数据">
-            <h2 className="settings-view__card-heading">清空全部数据</h2>
-            <p className="settings-view__card-desc">
-              删除所有追番记录。此操作无法撤销，建议先导出 JSON 备份。
-            </p>
+            <div className="settings-view__divider" />
+
             {!confirmingClear ? (
               <div className="settings-view__actions">
                 <button
@@ -457,18 +437,13 @@ export function SettingsView(): JSX.Element {
                   onClick={handleRequestClear}
                   disabled={animeCount === 0}
                 >
-                  清空全部数据
+                  清空数据
                 </button>
-                {animeCount === 0 && (
-                  <span className="settings-view__status settings-view__status--info">
-                    当前没有追番记录
-                  </span>
-                )}
               </div>
             ) : (
               <div className="settings-view__confirm" role="alertdialog" aria-label="确认清空">
                 <span className="settings-view__confirm-text">
-                  确定清空所有 {animeCount} 部追番记录？此操作不可撤销。
+                  这会删除所有本地追番记录，且无法撤销。
                 </span>
                 <div className="settings-view__confirm-actions">
                   <button
@@ -499,26 +474,18 @@ export function SettingsView(): JSX.Element {
             )}
           </section>
 
-          {/* —— 关于 / Credits —— */}
+          {/* —— 关于 —— */}
           <section className="settings-view__card" aria-label="关于">
-            <h2 className="settings-view__card-heading">关于 Pochan</h2>
+            <h2 className="settings-view__card-heading">关于</h2>
             <div className="settings-view__credits">
-              <p className="settings-view__credits-version">v0.1.0</p>
-              <p className="settings-view__credits-desc">
-                一个本地优先的追番气泡工具。
-              </p>
               <div className="settings-view__credits-list">
+                <div className="settings-view__credits-item">
+                  <span className="settings-view__credits-role">版本</span>
+                  <span className="settings-view__credits-name settings-view__credits-mono">v0.1.0</span>
+                </div>
                 <div className="settings-view__credits-item">
                   <span className="settings-view__credits-role">开发</span>
                   <span className="settings-view__credits-name">Lavr0v0</span>
-                </div>
-                <div className="settings-view__credits-item">
-                  <span className="settings-view__credits-role">框架</span>
-                  <span className="settings-view__credits-name">Tauri + React + TypeScript</span>
-                </div>
-                <div className="settings-view__credits-item">
-                  <span className="settings-view__credits-role">物理引擎</span>
-                  <span className="settings-view__credits-name">Matter.js</span>
                 </div>
                 <div className="settings-view__credits-item">
                   <span className="settings-view__credits-role">数据源</span>

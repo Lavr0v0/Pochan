@@ -93,33 +93,32 @@
 .app__panel-tabs {
   display: flex;
   gap: 0;
-  padding: 0;
-  background-color: var(--color-bg-soft);
-  border-bottom: 1px solid var(--color-border);
+  padding: 8px 12px;
+  background-color: var(--color-bg);
 }
 
 .app__panel-tab {
   flex: 1;
-  padding: 12px 8px;
+  padding: 7px 8px;
   border: none;
   background: none;
   font-family: inherit;
-  font-size: 0.85rem;
-  color: var(--color-text-soft);
+  font-size: 0.8rem;
+  color: var(--color-text-muted, var(--color-text-soft));
   cursor: pointer;
-  transition: background-color 120ms ease, color 120ms ease;
-  border-bottom: 2px solid transparent;
+  transition: background-color 100ms ease, color 100ms ease;
+  border-radius: var(--radius-sm);
 }
 
 .app__panel-tab:hover {
-  background-color: rgba(0, 0, 0, 0.03);
+  background-color: var(--color-bg-surface-hover, var(--color-bg-soft));
   color: var(--color-text);
 }
 
 .app__panel-tab--active {
   color: var(--color-text);
   font-weight: 600;
-  border-bottom-color: var(--color-text);
+  background-color: var(--color-bg-soft);
 }
 
 .app__panel-content {
