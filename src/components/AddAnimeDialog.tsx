@@ -172,6 +172,14 @@ function inferAirDay(subject: BangumiSubject): number | undefined {
   if (w !== undefined && Number.isInteger(w) && w >= 1 && w <= 7) {
     return convertAirWeekday(w);
   }
+  // 从开播日期推算周几
+  const airDate = subject.date || subject.air_date;
+  if (airDate) {
+    const d = new Date(airDate);
+    if (!isNaN(d.getTime())) {
+      return d.getDay(); // 0=周日, 和内部 airDay 一致
+    }
+  }
   return undefined;
 }
 

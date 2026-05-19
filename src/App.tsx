@@ -113,8 +113,13 @@ function App(): JSX.Element {
     if (anime.totalEpisodes > 0 && anime.watchedEpisodes >= anime.totalEpisodes) return;
     incrementWatched(animeId);
 
-    // 看完最后一集 → 触发完成动画 → 延迟改状态
-    if (anime.totalEpisodes > 0 && anime.watchedEpisodes + 1 >= anime.totalEpisodes) {
+    // 只有已完结的番看完最后一集才自动标为"看完"
+    // 连载中的番看完当前集数不算看完（还会更新）
+    if (
+      anime.status === 'finished' &&
+      anime.totalEpisodes > 0 &&
+      anime.watchedEpisodes + 1 >= anime.totalEpisodes
+    ) {
       setCompletingId(animeId);
       void shakeWindow();
       setTimeout(() => {

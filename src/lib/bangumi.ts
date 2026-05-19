@@ -343,6 +343,16 @@ export function bangumiSubjectToTrackedAnime(
   ) {
     airDay = convertAirWeekday(subject.air_weekday);
   }
+  // 如果 air_weekday 不可用，从开播日期推算周几
+  if (airDay === undefined) {
+    const subjectDate = subject.date || subject.air_date;
+    if (subjectDate) {
+      const d = new Date(subjectDate);
+      if (!isNaN(d.getTime())) {
+        airDay = d.getDay(); // 0=周日, 1=周一, ..., 6=周六（和内部 airDay 一致）
+      }
+    }
+  }
 
   const tracked: TrackedAnime = {
     id: subject.id,
@@ -464,6 +474,13 @@ export async function importFromBangumi(username: string): Promise<TrackedAnime[
     let airDay: number | undefined;
     if (subject.air_weekday !== undefined && Number.isInteger(subject.air_weekday) && subject.air_weekday >= 1 && subject.air_weekday <= 7) {
       airDay = convertAirWeekday(subject.air_weekday);
+    }
+    // 如果 air_weekday 不可用，从开播日期推算
+    if (airDay === undefined && subjectAirDate) {
+      const d = new Date(subjectAirDate);
+      if (!isNaN(d.getTime())) {
+        airDay = d.getDay();
+      }
     }
 
     const watchStatus = COLLECTION_TYPE_MAP[item.type] ?? 'watching';
