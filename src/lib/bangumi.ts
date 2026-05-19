@@ -362,6 +362,7 @@ export function bangumiSubjectToTrackedAnime(
     totalEpisodes,
 
     watchedEpisodes: form.watchedEpisodes,
+    initialWatchedEpisodes: form.watchedEpisodes,
     lastWatchedAt: now,
     addedAt: now,
 
@@ -500,6 +501,7 @@ export async function importFromBangumi(username: string): Promise<TrackedAnime[
       cover: subject.images?.large ?? '',
       totalEpisodes,
       watchedEpisodes: item.ep_status ?? 0,
+      initialWatchedEpisodes: item.ep_status ?? 0,
       lastWatchedAt: now,
       addedAt: now,
       status: inferStatus(subjectForInfer),

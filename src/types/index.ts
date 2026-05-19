@@ -51,6 +51,8 @@ export interface TrackedAnime {
   // —— 追番状态 ——
   /** 已观看集数 */
   watchedEpisodes: number;
+  /** 添加时的初始已看集数（不计入气泡高度计算） */
+  initialWatchedEpisodes?: number;
   /** 上次观看时间（ISO 8601） */
   lastWatchedAt: string;
   /** 添加时间（ISO 8601） */

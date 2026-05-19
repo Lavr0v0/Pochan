@@ -259,7 +259,7 @@ export function BubbleCanvas(props: BubbleCanvasProps): JSX.Element {
       bodiesRef.current.forEach((body, animeId) => {
         const anime = animeById.get(animeId);
         if (!anime) return;
-        const staleness = computeFrequencyStaleness(now, anime.addedAt, anime.watchedEpisodes);
+        const staleness = computeFrequencyStaleness(now, anime.addedAt, anime.watchedEpisodes, anime.initialWatchedEpisodes ?? 0);
         const r = body.circleRadius ?? 30;
 
         const minY = PADDING + r;
@@ -413,7 +413,7 @@ export function BubbleCanvas(props: BubbleCanvasProps): JSX.Element {
     // 1. 新增：为列表里没有 body 的 anime 创建 body
     for (const anime of animes) {
       if (bodiesRef.current.has(anime.id)) continue;
-      const staleness = computeFrequencyStaleness(now, anime.addedAt, anime.watchedEpisodes);
+      const staleness = computeFrequencyStaleness(now, anime.addedAt, anime.watchedEpisodes, anime.initialWatchedEpisodes ?? 0);
       const r = computeBubbleRadius(anime.watchedEpisodes, staleness);
       const x = randomCoord(width, r);
       const y = randomCoord(height, r);
@@ -444,7 +444,7 @@ export function BubbleCanvas(props: BubbleCanvasProps): JSX.Element {
     for (const anime of animes) {
       const body = bodiesRef.current.get(anime.id);
       if (!body) continue;
-      const staleness = computeFrequencyStaleness(now, anime.addedAt, anime.watchedEpisodes);
+      const staleness = computeFrequencyStaleness(now, anime.addedAt, anime.watchedEpisodes, anime.initialWatchedEpisodes ?? 0);
       const targetR = computeBubbleRadius(anime.watchedEpisodes, staleness);
       const currentR = body.circleRadius ?? 0;
       if (currentR > 0 && Math.abs(targetR - currentR) > RADIUS_RESCALE_THRESHOLD_PX) {
@@ -526,7 +526,7 @@ export function BubbleCanvas(props: BubbleCanvasProps): JSX.Element {
         </div>
       )}
       {animes.map((anime) => {
-        const staleness = computeFrequencyStaleness(now, anime.addedAt, anime.watchedEpisodes);
+        const staleness = computeFrequencyStaleness(now, anime.addedAt, anime.watchedEpisodes, anime.initialWatchedEpisodes ?? 0);
         const radius = computeBubbleRadius(anime.watchedEpisodes, staleness);
         const opacity = computeOpacity(staleness);
         const { bg, text } = pickColors(anime);

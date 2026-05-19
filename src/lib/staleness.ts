@@ -68,44 +68,38 @@ export function computeStaleness(now: number, lastWatchedAtIso: string): number 
 /**
  * 基于频率计算 staleness（位置）。
  *
- * 位置语义：
- *   - 顶部（staleness=0）：10 集/天
- *   - 正中间（staleness=0.5）：1 集/天
- *   - 底部（staleness=1）：0 集/14 天（完全不看）
+ * 只计算添加后新看的集数。
+ * 频率 = 新看集数 / 实际添加天数（不归一化到 14 天）。
  *
- * 使用对数映射让中间区域有更好的分辨率：
- *   staleness = 1 - log(frequency + 1) / log(11)
- *   其中 frequency = watchedEpisodes / windowDays
+ * 位置语义：
+ *   - 底部（staleness=1）：0 集/天
+ *   - 中间（staleness≈0.5）：1 集/天
+ *   - 顶部（staleness=0）：10 集/天
  */
 export function computeFrequencyStaleness(
   now: number,
   addedAtIso: string,
   watchedEpisodes: number,
+  initialWatchedEpisodes: number = 0,
 ): number {
   const addedAt = Date.parse(addedAtIso);
-  if (Number.isNaN(addedAt) || watchedEpisodes <= 0) {
-    return 1; // 没看过 → 底部
+  const newEpisodes = watchedEpisodes - initialWatchedEpisodes;
+  if (Number.isNaN(addedAt) || newEpisodes <= 0) {
+    return 1;
   }
   const daysSinceAdded = (now - addedAt) / MS_PER_DAY;
-  // 窗口：下限 0.5 天（避免除零），上限 14 天
-  const windowDays = clamp(daysSinceAdded, 0.5, STALENESS_WINDOW_DAYS);
-  const frequency = watchedEpisodes / windowDays; // 集/天
+  // 最少半天，最多 14 天
+  const days = clamp(daysSinceAdded, 0.5, STALENESS_WINDOW_DAYS);
+  const frequency = newEpisodes / days; // 集/天
 
-  // log 映射：frequency=10 → staleness≈0, frequency=1 → staleness≈0.5, frequency=0 → staleness=1
-  // log(10+1)/log(11) = 1 → staleness = 0
-  // log(1+1)/log(11) ≈ 0.29 → staleness ≈ 0.71... 不太对
-  // 用更直接的公式：staleness = 1 - clamp(log2(frequency + 1) / log2(11), 0, 1)
-  // log2(11) ≈ 3.459
-  // frequency=10: log2(11)/log2(11) = 1 → staleness = 0 ✓
-  // frequency=1: log2(2)/log2(11) ≈ 0.289 → staleness ≈ 0.71... 还是不对
-
-  // 要求 frequency=1 时 staleness=0.67（从顶部算三分之一处偏下）
-  // staleness = 1 - (frequency / 10)^p
-  // 0.67 = 1 - (1/10)^p → (0.1)^p = 0.33
-  // p = log(0.33) / log(0.1) ≈ 0.481
-  const p = 0.481;
-  const normalized = clamp(frequency / 10, 0, 1);
-  return clamp(1 - Math.pow(normalized, p), 0, 1);
+  // 对数映射：0→1, 1→≈0.5, 10→0
+  // log(1+1)/log(11) ≈ 0.289 → staleness = 1-0.289 = 0.71... 不够中间
+  // 用 log(freq*5 + 1) / log(51)：
+  // freq=0: 0 → staleness=1
+  // freq=1: log(6)/log(51) ≈ 0.456 → staleness≈0.54 ≈中间 ✓
+  // freq=10: log(51)/log(51) = 1 → staleness=0 ✓
+  const staleness = 1 - Math.log(frequency * 5 + 1) / Math.log(51);
+  return clamp(staleness, 0, 1);
 }
 
 /**
