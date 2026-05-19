@@ -154,9 +154,8 @@ export interface PaletteColor {
 }
 
 /**
- * 七色柔和调色板（紫、青、橙、粉、蓝、黄、绿）。
- *
- * 顺序与 design.md 严格一致；动画 id 按 `id % 7` 取色。
+ * 八色柔和调色板。
+ * 按 `id % 8` 取色。
  */
 export const PALETTE: readonly PaletteColor[] = [
   { bg: '#CECBF6', text: '#3C3489' }, // 紫
@@ -166,21 +165,11 @@ export const PALETTE: readonly PaletteColor[] = [
   { bg: '#B5D4F4', text: '#0C447C' }, // 蓝
   { bg: '#FAC775', text: '#633806' }, // 黄
   { bg: '#C0DD97', text: '#27500A' }, // 绿
+  { bg: '#E8D5C4', text: '#5C3D2E' }, // 棕
 ] as const;
 
-/**
- * 按 animeId 从 PALETTE 中选取一组颜色。
- *
- * 性质（Property 4）：
- *   - 结果必落在 PALETTE 内（total）
- *   - 同一 id 多次调用结果相同（确定性）
- *   - 周期为 PALETTE.length（=7）：pickPaletteColor(id) === pickPaletteColor(id + 7)
- *   - 对负数 id 也成立（采用 `((id % len) + len) % len` 归一化）
- */
 export function pickPaletteColor(animeId: number): PaletteColor {
   const len = PALETTE.length;
-  // 归一化以兼容负数与非整数 id；对正整数等价于 `animeId % len`。
   const idx = (((animeId % len) + len) % len) | 0;
-  // PALETTE 不为空，idx ∈ [0, len)，访问安全。
   return PALETTE[idx] as PaletteColor;
 }

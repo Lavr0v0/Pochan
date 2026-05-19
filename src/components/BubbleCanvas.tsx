@@ -240,7 +240,7 @@ export function BubbleCanvas(props: BubbleCanvasProps): JSX.Element {
       const PADDING = 60;
       const FLOAT_AMPLITUDE = 15; // 上下浮动振幅（px）
       const FLOAT_PERIOD_MS = 4000;
-      const DEBOUNCE_MS = 500;
+      const DEBOUNCE_MS = 350;
       const ANIM_DURATION_BASE_MS = 2400; // 短距离动画基础时长（约 2.4 秒）
       const ANIM_DURATION_PER_PX = 3.5; // 距离每多 1px 增加 3.5ms
       const ANIM_DURATION_MAX_MS = 6000; // 上限 6 秒（极长距离）

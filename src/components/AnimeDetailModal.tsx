@@ -38,7 +38,7 @@ import {
 import type { ChangeEvent, KeyboardEvent, MouseEvent } from 'react';
 
 import type { TrackedAnime } from '../types';
-import { PALETTE, pickPaletteColor } from '../types';
+import { pickPaletteColor } from '../types';
 import { useAnimeStore } from '../store/useAnimeStore';
 
 import './AnimeDetailModal.css';
@@ -229,29 +229,6 @@ function ModalContent(props: ModalContentProps): JSX.Element {
   // 颜色编辑
   // -------------------------------------------------------------------------
 
-  const handlePaletteSelect = useCallback(
-    (hex: string) => {
-      if (anime.color === hex) return;
-      updateAnime(anime.id, { color: hex });
-    },
-    [anime.id, anime.color, updateAnime],
-  );
-
-  const handleColorPickerChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      const hex = e.target.value;
-      if (anime.color === hex) return;
-      updateAnime(anime.id, { color: hex });
-    },
-    [anime.id, anime.color, updateAnime],
-  );
-
-  const handleColorReset = useCallback(() => {
-    if (anime.color === undefined) return;
-    // updateAnime 走对象 spread 合并，传 undefined 会显式把 color 设为 undefined
-    updateAnime(anime.id, { color: undefined });
-  }, [anime.id, anime.color, updateAnime]);
-
   // -------------------------------------------------------------------------
   // 删除流程：点击 → 进入确认 → 取消 / 确认
   // -------------------------------------------------------------------------
@@ -307,9 +284,6 @@ function ModalContent(props: ModalContentProps): JSX.Element {
   const displayPrimary = anime.nameCn || anime.name || '(未命名)';
   const displaySecondary = anime.nameCn ? anime.name : '';
   const totalDisplay = anime.totalEpisodes > 0 ? anime.totalEpisodes : '?';
-  const defaultPalette = pickPaletteColor(anime.id);
-  const currentColor = anime.color ?? defaultPalette.bg;
-  const isCustomColor = anime.color !== undefined;
 
   // -------------------------------------------------------------------------
   // 渲染
@@ -431,54 +405,6 @@ function ModalContent(props: ModalContentProps): JSX.Element {
                 placeholder="写一点关于这部番的想法…"
                 rows={3}
               />
-            </section>
-
-            {/* 自定义颜色 */}
-            <section className="anime-detail-modal__field">
-              <span className="anime-detail-modal__field-label">自定义颜色</span>
-              <div
-                className="anime-detail-modal__palette"
-                role="radiogroup"
-                aria-label="选择气泡颜色"
-              >
-                {PALETTE.map((color) => {
-                  const selected = anime.color === color.bg;
-                  return (
-                    <button
-                      key={color.bg}
-                      type="button"
-                      role="radio"
-                      aria-checked={selected}
-                      aria-label={color.bg}
-                      className={
-                        'anime-detail-modal__swatch' +
-                        (selected ? ' anime-detail-modal__swatch--selected' : '')
-                      }
-                      style={{ backgroundColor: color.bg }}
-                      onClick={() => handlePaletteSelect(color.bg)}
-                    />
-                  );
-                })}
-              </div>
-              <div className="anime-detail-modal__color-extra">
-                <label className="anime-detail-modal__picker-label">
-                  <span>自选</span>
-                  <input
-                    type="color"
-                    value={currentColor}
-                    onChange={handleColorPickerChange}
-                    aria-label="自定义颜色（hex）"
-                  />
-                </label>
-                <button
-                  type="button"
-                  className="anime-detail-modal__reset-color"
-                  onClick={handleColorReset}
-                  disabled={!isCustomColor}
-                >
-                  重置为默认
-                </button>
-              </div>
             </section>
           </div>
         </div>
