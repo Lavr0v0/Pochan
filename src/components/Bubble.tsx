@@ -38,7 +38,16 @@ const CLICK_FEEDBACK_MS = 200;
 const LONG_PRESS_MS = 500;
 
 const BubbleImpl = forwardRef<HTMLDivElement, BubbleProps>(function Bubble(props, ref) {
-  const { anime, radius, opacity, bgColor, textColor } = props;
+  const {
+    anime,
+    radius,
+    opacity,
+    bgColor,
+    textColor,
+    onClick,
+    onDoubleClick,
+    onContextMenu,
+  } = props;
   const [imgFailed, setImgFailed] = useState(false);
   const activeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -60,21 +69,21 @@ const BubbleImpl = forwardRef<HTMLDivElement, BubbleProps>(function Bubble(props
         el.classList.remove('is-active');
         activeTimerRef.current = null;
       }, CLICK_FEEDBACK_MS);
-      props.onClick?.(anime.id);
+      onClick?.(anime.id);
     },
-    [anime.id, props],
+    [anime.id, onClick],
   );
 
   const handleDoubleClick = useCallback(() => {
-    props.onDoubleClick?.(anime.id);
-  }, [anime.id, props]);
+    onDoubleClick?.(anime.id);
+  }, [anime.id, onDoubleClick]);
 
   const handleContextMenu = useCallback(
     (event: MouseEvent<HTMLDivElement>) => {
       event.preventDefault();
-      props.onContextMenu?.(anime.id, event.clientX, event.clientY);
+      onContextMenu?.(anime.id, event.clientX, event.clientY);
     },
-    [anime.id, props],
+    [anime.id, onContextMenu],
   );
 
   // 长按触摸支持（移动端替代右键）
@@ -87,12 +96,11 @@ const BubbleImpl = forwardRef<HTMLDivElement, BubbleProps>(function Bubble(props
       const y = touch.clientY;
       longPressTimerRef.current = setTimeout(() => {
         longPressTriggeredRef.current = true;
-        // 触觉反馈（如果浏览器支持）
         if (navigator.vibrate) navigator.vibrate(30);
-        props.onContextMenu?.(anime.id, x, y);
+        onContextMenu?.(anime.id, x, y);
       }, LONG_PRESS_MS);
     },
-    [anime.id, props],
+    [anime.id, onContextMenu],
   );
 
   const handleTouchEnd = useCallback(() => {

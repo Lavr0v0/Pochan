@@ -1,35 +1,9 @@
 /**
- * BubbleCanvas 主组件
+ * BubbleCanvas — 气泡物理画布
  *
- * 实现 design.md "Components and Interfaces / BubbleCanvas" 与
- * requirements.md Requirements 1.9 / 2.1 / 2.2 / 2.3 / 2.4 / 2.6 / 2.7 /
- * 3.4 / 3.5 / 3.7 / 3.8 / 3.9 / 3.10 / 11.4。
- *
- * 职责：
- *   1. 初始化 matter.js Engine + 四面静态墙体作为画布边界。
- *   2. 为每部 Tracked_Anime 创建一个圆形刚体 (Bodies.circle)，并维护
- *      `animeId → Matter.Body` 与 `animeId → HTMLDivElement` 两张映射。
- *   3. requestAnimationFrame 主循环：
- *        - 计算每部番的 staleness/freshness
- *        - applyBuoyancy / applyJitter
- *        - Engine.update(engine, dt)
- *        - 通过 CSS 变量 --bubble-x / --bubble-y 同步 DOM 位置（不触发 React 重渲）
- *        - resetIfInvalid 自愈异常坐标
- *   4. 监听 `animes` prop 变化：新增 → 创建 body 与 DOM（带入场动画），
- *      删除 → 移除 body 与 DOM，watched 变化导致 radius 改变 → Body.scale。
- *   5. 单击：调用 props.onBubbleClick；应用 click impulse；Bubble 自带的 .is-active
- *      动画提供 scale(1.18) → 1 的回弹反馈。
- *   6. 双击：转发 props.onBubbleDoubleClick(animeId)。
- *   7. 右键：转发 props.onBubbleContextMenu(animeId, x, y)。
- *
- * 设计要点：
- *   - 物理状态走 ref（不触发 React 重渲）；视觉属性中 size/opacity 走 props
- *     （Bubble 通过 React inline style 写入 CSS 变量），位置走 DOM 直写
- *     （imperative per-frame）；两套通道在 CSS transform 中合成。
- *   - 设置一个低频 stalenessTick 计数器（每 STALENESS_RERENDER_INTERVAL_MS
- *     刷新一次），让 size / opacity 随 staleness 缓慢演化。物理引擎仍保持
- *     60fps 流畅。
- *   - 使用 ResizeObserver 跟踪容器尺寸；尺寸变化时重建四面墙。
+ * 使用 Matter.js 做物理模拟，位置通过 CSS 变量直写 DOM（不触发 React 重渲）。
+ * staleness 低频刷新（5s）让 size/opacity 缓慢演化，物理引擎保持 60fps。
+ * ResizeObserver 跟踪容器尺寸，尺寸变化时重建墙体。
  */
 
 import {

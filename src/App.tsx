@@ -15,6 +15,7 @@ import { LibraryView } from './views/LibraryView';
 import { CalendarView } from './views/CalendarView';
 import { SettingsView } from './views/SettingsView';
 import { checkAndNotifyTodayAiring } from './lib/notification';
+import { shakeWindow } from './lib/windowEffects';
 import type { TrackedAnime } from './types';
 
 import './App.css';
@@ -84,26 +85,10 @@ function App(): JSX.Element {
     if (anime.totalEpisodes > 0 && anime.watchedEpisodes >= anime.totalEpisodes) return;
     incrementWatched(animeId);
 
-    // 看完最后一集 → 触发完成动画 + 设为看完
+    // 看完最后一集 → 完成动画 + 改状态 + 震窗口
     if (anime.totalEpisodes > 0 && anime.watchedEpisodes + 1 >= anime.totalEpisodes) {
-      // 给气泡加 completed class（动画 1.2s），然后改状态
       setTimeout(() => updateAnime(animeId, { watchStatus: 'completed' }), 1200);
-      // 震窗口
-      import('@tauri-apps/api/window').then(({ getCurrentWindow }) => {
-        import('@tauri-apps/api/dpi').then(({ PhysicalPosition }) => {
-          const win = getCurrentWindow();
-          const shake = async () => {
-            const pos = await win.outerPosition();
-            for (let i = 0; i < 6; i++) {
-              const offset = i % 2 === 0 ? 5 : -5;
-              await win.setPosition(new PhysicalPosition(pos.x + offset, pos.y));
-              await new Promise((r) => setTimeout(r, 40));
-            }
-            await win.setPosition(new PhysicalPosition(pos.x, pos.y));
-          };
-          void shake();
-        });
-      }).catch(() => {});
+      void shakeWindow();
     }
   };
 
