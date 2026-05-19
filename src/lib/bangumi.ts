@@ -190,7 +190,8 @@ export async function getAiredEpisodeCount(subjectId: number): Promise<number> {
  */
 export function inferStatus(subject: BangumiSubject): 'airing' | 'finished' | 'upcoming' {
   const today = new Date().toISOString().slice(0, 10);
-  const airDate = subject.air_date;
+  // API v0 返回 "date"，旧版返回 "air_date"
+  const airDate = subject.date || subject.air_date;
 
   // 没有开播日期 → 已完结（无法判断）
   if (!airDate) {
@@ -215,13 +216,14 @@ export function inferStatus(subject: BangumiSubject): 'airing' | 'finished' | 'u
     return 'airing';
   }
 
-  // 总集数未知：如果有 air_weekday 则视为连载中
+  // 总集数未知：如果有 air_weekday 则视为连载中，否则看平台
   const w = subject.air_weekday;
-  if (Number.isInteger(w) && w >= 1 && w <= 7) {
+  if (Number.isInteger(w) && w! >= 1 && w! <= 7) {
     return 'airing';
   }
 
-  return 'finished';
+  // 总集数未知 + 无 air_weekday + 已开播 → 视为连载中（保守判断）
+  return 'airing';
 }
 
 /**
@@ -334,6 +336,7 @@ export function bangumiSubjectToTrackedAnime(
   let airDay: number | undefined = form.airDay;
   if (
     airDay === undefined &&
+    subject.air_weekday !== undefined &&
     Number.isInteger(subject.air_weekday) &&
     subject.air_weekday >= 1 &&
     subject.air_weekday <= 7
@@ -357,7 +360,8 @@ export function bangumiSubjectToTrackedAnime(
 
   if (airDay !== undefined) tracked.airDay = airDay;
   if (form.airTime !== undefined) tracked.airTime = form.airTime;
-  if (subject.air_date) tracked.airDate = subject.air_date;
+  const subjectAirDate = subject.date || subject.air_date;
+  if (subjectAirDate) tracked.airDate = subjectAirDate;
   if (form.goal !== undefined) tracked.goal = form.goal;
   if (form.color !== undefined) tracked.color = form.color;
   if (form.notes !== undefined) tracked.notes = form.notes;
@@ -388,8 +392,10 @@ export interface BangumiCollectionItem {
     name: string;
     name_cn: string;
     images: { large: string; common: string };
-    air_date: string;
-    air_weekday: number;
+    /** 新版 API 用 "date"，旧版用 "air_date" */
+    date?: string;
+    air_date?: string;
+    air_weekday?: number;
     summary: string;
     eps: number;
     total_episodes?: number;
@@ -453,13 +459,22 @@ export async function importFromBangumi(username: string): Promise<TrackedAnime[
     const nameCnRaw = subject.name_cn ?? '';
     const nameCn = nameCnRaw.length > 0 ? nameCnRaw : name;
     const totalEpisodes = subject.total_episodes ?? subject.eps ?? 0;
+    const subjectAirDate = subject.date || subject.air_date;
 
     let airDay: number | undefined;
-    if (Number.isInteger(subject.air_weekday) && subject.air_weekday >= 1 && subject.air_weekday <= 7) {
+    if (subject.air_weekday !== undefined && Number.isInteger(subject.air_weekday) && subject.air_weekday >= 1 && subject.air_weekday <= 7) {
       airDay = convertAirWeekday(subject.air_weekday);
     }
 
     const watchStatus = COLLECTION_TYPE_MAP[item.type] ?? 'watching';
+
+    // 构造一个兼容 inferStatus 的对象
+    const subjectForInfer = {
+      ...subject,
+      date: subjectAirDate ?? '',
+      air_date: subjectAirDate,
+      total_episodes: totalEpisodes,
+    } as unknown as BangumiSubject;
 
     return {
       id: subject.id,
@@ -470,13 +485,10 @@ export async function importFromBangumi(username: string): Promise<TrackedAnime[
       watchedEpisodes: item.ep_status ?? 0,
       lastWatchedAt: now,
       addedAt: now,
-      status: inferStatus({
-        ...subject,
-        total_episodes: totalEpisodes,
-      } as BangumiSubject),
+      status: inferStatus(subjectForInfer),
       watchStatus,
       airDay,
-      airDate: subject.air_date || undefined,
+      airDate: subjectAirDate || undefined,
       summary: subject.summary ?? undefined,
     };
   });

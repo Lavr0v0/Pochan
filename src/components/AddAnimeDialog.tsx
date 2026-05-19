@@ -169,7 +169,7 @@ const AIR_DAY_LABELS: readonly string[] = [
 /** 根据 BangumiSubject 推断默认 airDay；不合法时返回 undefined */
 function inferAirDay(subject: BangumiSubject): number | undefined {
   const w = subject.air_weekday;
-  if (Number.isInteger(w) && w >= 1 && w <= 7) {
+  if (w !== undefined && Number.isInteger(w) && w >= 1 && w <= 7) {
     return convertAirWeekday(w);
   }
   return undefined;

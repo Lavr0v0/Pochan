@@ -140,9 +140,16 @@ export interface BangumiSubject {
   summary: string;
   total_episodes: number;
   eps: number;
-  air_date: string;
-  air_weekday: number;
+  /** API 返回 "date" 而非 "air_date" */
+  date: string;
+  /** API 可能不返回此字段（新版 API 已移除） */
+  air_weekday?: number;
+  /** 旧字段兼容 */
+  air_date?: string;
+  platform?: string;
   images: { large: string; common: string };
+  rating?: { score: number; total: number };
+  tags?: Array<{ name: string; count: number }>;
 }
 
 // ---------------------------------------------------------------------------
