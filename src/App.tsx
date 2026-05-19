@@ -118,42 +118,51 @@ function App(): JSX.Element {
   return (
     <div className="app">
       {/* 自定义标题栏 */}
-      <div className="app__titlebar" data-tauri-drag-region>
-        <span className="app__titlebar-title" data-tauri-drag-region>Pochan</span>
+      <div
+        className="app__titlebar"
+        onMouseDown={(e) => {
+          if (e.buttons === 1 && e.detail === 2) {
+            import('@tauri-apps/api/window').then(({ getCurrentWindow }) => {
+              getCurrentWindow().toggleMaximize();
+            });
+          } else if (e.buttons === 1) {
+            import('@tauri-apps/api/window').then(({ getCurrentWindow }) => {
+              getCurrentWindow().startDragging();
+            });
+          }
+        }}
+      >
         <div className="app__titlebar-controls">
-          <button
-            className="app__titlebar-btn"
-            aria-label="最小化"
-            onClick={() => {
-              import('@tauri-apps/api/window').then(({ getCurrentWindow }) => {
-                getCurrentWindow().minimize();
-              });
-            }}
-          >
-            &#x2013;
-          </button>
-          <button
-            className="app__titlebar-btn"
-            aria-label="最大化"
-            onClick={() => {
-              import('@tauri-apps/api/window').then(({ getCurrentWindow }) => {
-                getCurrentWindow().toggleMaximize();
-              });
-            }}
-          >
-            &#x25A1;
-          </button>
           <button
             className="app__titlebar-btn app__titlebar-btn--close"
             aria-label="关闭"
+            onMouseDown={(e) => e.stopPropagation()}
             onClick={() => {
               import('@tauri-apps/api/window').then(({ getCurrentWindow }) => {
                 getCurrentWindow().close();
               });
             }}
-          >
-            &#x2715;
-          </button>
+          />
+          <button
+            className="app__titlebar-btn app__titlebar-btn--minimize"
+            aria-label="最小化"
+            onMouseDown={(e) => e.stopPropagation()}
+            onClick={() => {
+              import('@tauri-apps/api/window').then(({ getCurrentWindow }) => {
+                getCurrentWindow().minimize();
+              });
+            }}
+          />
+          <button
+            className="app__titlebar-btn app__titlebar-btn--maximize"
+            aria-label="最大化"
+            onMouseDown={(e) => e.stopPropagation()}
+            onClick={() => {
+              import('@tauri-apps/api/window').then(({ getCurrentWindow }) => {
+                getCurrentWindow().toggleMaximize();
+              });
+            }}
+          />
         </div>
       </div>
       {/* 主内容区 */}

@@ -14,56 +14,50 @@
 }
 
 /* ---------------------------------------------------------------------------
- * 自定义标题栏
+ * 自定义标题栏（macOS 风格红绿灯按钮）
  * ------------------------------------------------------------------------- */
 
 .app__titlebar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  height: 32px;
+  height: 38px;
   flex-shrink: 0;
   background-color: var(--color-bg-soft);
   border-bottom: 1px solid var(--color-border);
-  padding-left: 12px;
-  -webkit-app-region: drag;
-}
-
-.app__titlebar-title {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--color-text-soft);
-  pointer-events: none;
+  padding-left: 14px;
+  cursor: default;
 }
 
 .app__titlebar-controls {
   display: flex;
-  height: 100%;
-  -webkit-app-region: no-drag;
+  align-items: center;
+  gap: 8px;
 }
 
 .app__titlebar-btn {
-  width: 46px;
-  height: 100%;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
   border: none;
-  background: none;
-  color: var(--color-text-soft);
-  font-size: 0.75rem;
   cursor: pointer;
-  transition: background-color 100ms ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  transition: opacity 150ms ease;
+  opacity: 0.85;
 }
 
 .app__titlebar-btn:hover {
-  background-color: var(--color-border-strong);
-  color: var(--color-text);
+  opacity: 1;
 }
 
-.app__titlebar-btn--close:hover {
-  background-color: #e81123;
-  color: white;
+.app__titlebar-btn--close {
+  background-color: #ff5f57;
+}
+
+.app__titlebar-btn--minimize {
+  background-color: #ffbd2e;
+}
+
+.app__titlebar-btn--maximize {
+  background-color: #28c840;
 }
 
 /* ---------------------------------------------------------------------------
