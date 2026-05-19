@@ -68,9 +68,9 @@
   }
 }
 
-/* 退出动画：看完（向上飘出 + 缩小 + 淡出） */
+/* 退出动画：看完（先下沉一点，再向上飘出屏幕） */
 .bubble.bubble--completed {
-  animation: bubble-float-away 1.2s ease-in forwards;
+  animation: bubble-float-away 1.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   pointer-events: none;
 }
 
@@ -79,19 +79,19 @@
     transform: translate(var(--bubble-x, 0px), var(--bubble-y, 0px)) scale(1);
     opacity: var(--bubble-opacity, 1);
   }
-  60% {
-    transform: translate(var(--bubble-x, 0px), calc(var(--bubble-y, 0px) - 80px)) scale(1.1);
-    opacity: 0.8;
+  15% {
+    transform: translate(var(--bubble-x, 0px), calc(var(--bubble-y, 0px) + 30px)) scale(0.95);
+    opacity: var(--bubble-opacity, 1);
   }
   100% {
-    transform: translate(var(--bubble-x, 0px), calc(var(--bubble-y, 0px) - 200px)) scale(0.3);
+    transform: translate(var(--bubble-x, 0px), calc(var(--bubble-y, 0px) - 300px)) scale(0.6);
     opacity: 0;
   }
 }
 
-/* 退出动画：弃番（向下沉 + 变灰 + 淡出） */
+/* 退出动画：弃番（先上浮一点，再向下沉出屏幕） */
 .bubble.bubble--dropped {
-  animation: bubble-sink 1s ease-in forwards;
+  animation: bubble-sink 1.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   pointer-events: none;
 }
 
@@ -101,13 +101,15 @@
     opacity: var(--bubble-opacity, 1);
     filter: none;
   }
-  50% {
-    filter: grayscale(0.8);
+  15% {
+    transform: translate(var(--bubble-x, 0px), calc(var(--bubble-y, 0px) - 25px)) scale(0.95);
+    opacity: var(--bubble-opacity, 1);
+    filter: none;
   }
   100% {
-    transform: translate(var(--bubble-x, 0px), calc(var(--bubble-y, 0px) + 150px)) scale(0.5);
+    transform: translate(var(--bubble-x, 0px), calc(var(--bubble-y, 0px) + 300px)) scale(0.6);
     opacity: 0;
-    filter: grayscale(1);
+    filter: grayscale(0.8);
   }
 }
 

@@ -87,7 +87,7 @@ function App(): JSX.Element {
 
     // 看完最后一集 → 完成动画 + 改状态 + 震窗口
     if (anime.totalEpisodes > 0 && anime.watchedEpisodes + 1 >= anime.totalEpisodes) {
-      setTimeout(() => updateAnime(animeId, { watchStatus: 'completed' }), 1200);
+      setTimeout(() => updateAnime(animeId, { watchStatus: 'completed' }), 1400);
       void shakeWindow();
     }
   };
