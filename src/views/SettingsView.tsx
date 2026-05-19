@@ -34,6 +34,8 @@ import { readTextFile, writeTextFile } from '@tauri-apps/plugin-fs';
 
 import { useAnimeStore } from '../store/useAnimeStore';
 import { importFromBangumi, BangumiError } from '../lib/bangumi';
+import { applyTheme, getStoredTheme, setStoredTheme } from '../lib/theme';
+import type { ThemeMode } from '../lib/theme';
 
 import './SettingsView.css';
 
@@ -98,6 +100,15 @@ export function SettingsView(): JSX.Element {
   const [bangumiUsername, setBangumiUsername] = useState<string>('');
   const [bangumiImporting, setBangumiImporting] = useState<boolean>(false);
   const [bangumiStatus, setBangumiStatus] = useState<StatusMessage | null>(null);
+
+  // —— 主题切换 ——
+  const [theme, setTheme] = useState<ThemeMode>(() => getStoredTheme());
+
+  const handleThemeChange = useCallback((mode: ThemeMode) => {
+    setTheme(mode);
+    setStoredTheme(mode);
+    applyTheme(mode);
+  }, []);
 
   const addAnime = useAnimeStore((s) => s.addAnime);
   const animeCount = animes.length;
@@ -279,6 +290,46 @@ export function SettingsView(): JSX.Element {
 
       <div className="settings-view__body">
         <div className="settings-view__inner">
+          {/* —— 外观主题 —— */}
+          <section className="settings-view__card" aria-label="外观主题">
+            <h2 className="settings-view__card-heading">外观</h2>
+            <p className="settings-view__card-desc">
+              选择应用的颜色模式。「跟随系统」会根据你的系统设置自动切换深浅色。
+            </p>
+            <div className="settings-view__theme-options" role="radiogroup" aria-label="主题选择">
+              <button
+                type="button"
+                role="radio"
+                aria-checked={theme === 'light'}
+                className={`settings-view__theme-button${theme === 'light' ? ' settings-view__theme-button--active' : ''}`}
+                onClick={() => handleThemeChange('light')}
+              >
+                <span className="settings-view__theme-icon" aria-hidden="true">☀️</span>
+                <span>浅色</span>
+              </button>
+              <button
+                type="button"
+                role="radio"
+                aria-checked={theme === 'dark'}
+                className={`settings-view__theme-button${theme === 'dark' ? ' settings-view__theme-button--active' : ''}`}
+                onClick={() => handleThemeChange('dark')}
+              >
+                <span className="settings-view__theme-icon" aria-hidden="true">🌙</span>
+                <span>深色</span>
+              </button>
+              <button
+                type="button"
+                role="radio"
+                aria-checked={theme === 'auto'}
+                className={`settings-view__theme-button${theme === 'auto' ? ' settings-view__theme-button--active' : ''}`}
+                onClick={() => handleThemeChange('auto')}
+              >
+                <span className="settings-view__theme-icon" aria-hidden="true">💻</span>
+                <span>跟随系统</span>
+              </button>
+            </div>
+          </section>
+
           {/* —— 数据导出 —— */}
           <section className="settings-view__card" aria-label="数据导出">
             <h2 className="settings-view__card-heading">数据导出</h2>

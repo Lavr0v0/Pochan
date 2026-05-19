@@ -1,16 +1,18 @@
 /**
  * 全局样式与 CSS 变量
  *
- * - 颜色 / 圆角 / 字体栈定义在 :root，方便后续暗色模式与主题切换扩展
- * - MVP 暂不实现 prefers-color-scheme: dark 媒体查询（按 design.md 要求预留）
+ * 支持三种模式：浅色（默认）/ 深色 / 跟随系统
+ * 通过 html[data-theme] 属性切换主题
  */
 
 :root {
-  /* 颜色 */
-  --color-bg: #FAF7F2;          /* 米色 */
-  --color-bg-soft: #F3EFE8;     /* 浅奶油 */
-  --color-text: #2A2723;        /* 深灰棕 */
-  --color-text-soft: #6B665E;   /* 次级灰棕 */
+  /* 浅色主题（默认） */
+  --color-bg: #FAF7F2;
+  --color-bg-soft: #F3EFE8;
+  --color-text: #2A2723;
+  --color-text-soft: #6B665E;
+  --color-border: rgba(0, 0, 0, 0.06);
+  --color-border-strong: rgba(0, 0, 0, 0.12);
 
   /* 圆角 */
   --radius-sm: 6px;
@@ -20,6 +22,28 @@
   /* 字体栈 */
   --font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC',
                  'Microsoft YaHei', system-ui, sans-serif;
+}
+
+/* 深色主题 */
+html[data-theme="dark"] {
+  --color-bg: #1A1A1E;
+  --color-bg-soft: #242428;
+  --color-text: #E8E4DF;
+  --color-text-soft: #9B9590;
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-border-strong: rgba(255, 255, 255, 0.15);
+}
+
+/* 跟随系统：当 data-theme="auto" 时使用媒体查询 */
+@media (prefers-color-scheme: dark) {
+  html[data-theme="auto"] {
+    --color-bg: #1A1A1E;
+    --color-bg-soft: #242428;
+    --color-text: #E8E4DF;
+    --color-text-soft: #9B9590;
+    --color-border: rgba(255, 255, 255, 0.08);
+    --color-border-strong: rgba(255, 255, 255, 0.15);
+  }
 }
 
 /* 基础重置 */
@@ -45,6 +69,8 @@ body {
   user-select: none;
   /* 移动端：禁止下拉刷新 */
   overscroll-behavior: none;
+  /* 主题切换过渡 */
+  transition: background-color 200ms ease, color 200ms ease;
 }
 
 /* 允许输入框和文本区域选择文本 */

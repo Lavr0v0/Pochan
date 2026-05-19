@@ -23,7 +23,7 @@
   display: flex;
   flex-direction: column;
   background-color: var(--color-bg);
-  border-right: 1px solid rgba(0, 0, 0, 0.06);
+  border-right: 1px solid var(--color-border);
 }
 
 .app__panel-tabs {
@@ -31,7 +31,7 @@
   gap: 0;
   padding: 0;
   background-color: var(--color-bg-soft);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .app__panel-tab {
@@ -192,7 +192,7 @@
     right: 0;
     height: 56px;
     background-color: var(--color-bg);
-    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    border-top: 1px solid var(--color-border-strong);
     z-index: 200;
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
