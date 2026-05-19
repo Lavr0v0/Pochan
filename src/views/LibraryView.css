@@ -1,0 +1,574 @@
+/**
+ * LibraryView 番剧库视图样式
+ *
+ * 设计要点：
+ *   - 顶部工具栏：白色背景的 segmented buttons / select / 排序箭头按钮
+ *     与 BubbleView 的 toolbar 保持一致的视觉语言
+ *   - 批量操作 bar：淡黄色背景，与气泡黄徽章呼应，强调「正在批量编辑」
+ *   - 表格：行高 60px，封面 40×56；勾选行高亮米色 highlight
+ *   - 卡片：固定 200×280；hover 时上浮 + 阴影；进度条贴底
+ *   - 进度条：6px 高，使用 --color-bg-soft 槽 + --color-text 填充
+ */
+
+.library-view {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  background-color: var(--color-bg);
+}
+
+/* ---------------------------------------------------------------------------
+ * 顶部工具栏
+ * ------------------------------------------------------------------------- */
+
+.library-view__toolbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 12px 16px;
+  background-color: var(--color-bg-soft);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.library-view__toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.library-view__toolbar-label {
+  font-size: 0.85rem;
+  color: var(--color-text-soft);
+  font-weight: 600;
+}
+
+.library-view__toolbar-spacer {
+  flex: 1;
+}
+
+/* 滑块 pill 筛选 tab */
+.library-view__pill-tabs {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  background-color: rgba(0, 0, 0, 0.04);
+  border-radius: 999px;
+}
+
+.library-view__pill {
+  padding: 5px 14px;
+  border: none;
+  background: none;
+  border-radius: 999px;
+  font-family: inherit;
+  font-size: 0.8rem;
+  color: var(--color-text-soft);
+  cursor: pointer;
+  transition: background-color 200ms ease, color 200ms ease, box-shadow 200ms ease;
+}
+
+.library-view__pill:hover {
+  color: var(--color-text);
+}
+
+.library-view__pill--active {
+  background-color: white;
+  color: var(--color-text);
+  font-weight: 600;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.library-view__count {
+  font-size: 0.85rem;
+  color: var(--color-text-soft);
+}
+
+.library-view__select {
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background-color: white;
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.library-view__select:focus {
+  outline: none;
+  border-color: var(--color-text-soft);
+}
+
+.library-view__icon-button {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background-color: white;
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.library-view__icon-button:hover {
+  background-color: var(--color-bg-soft);
+}
+
+.library-view__search {
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background-color: white;
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: 0.875rem;
+  width: 180px;
+}
+
+.library-view__search:focus {
+  outline: none;
+  border-color: var(--color-text-soft);
+}
+
+/* Segmented button group ---------------------------------------------------- */
+
+.library-view__segmented {
+  display: inline-flex;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  background-color: white;
+}
+
+.library-view__segmented-button {
+  padding: 6px 14px;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: 0.875rem;
+  color: var(--color-text-soft);
+  cursor: pointer;
+  border-right: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.library-view__segmented-button:last-child {
+  border-right: none;
+}
+
+.library-view__segmented-button:hover {
+  background-color: var(--color-bg-soft);
+}
+
+.library-view__segmented-button--active {
+  background-color: var(--color-text);
+  color: var(--color-bg);
+  font-weight: 600;
+}
+
+.library-view__segmented-button--active:hover {
+  background-color: var(--color-text);
+}
+
+/* ---------------------------------------------------------------------------
+ * 批量操作 bar
+ * ------------------------------------------------------------------------- */
+
+.library-view__bulk-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 16px;
+  background-color: rgba(250, 199, 117, 0.18);
+  border-bottom: 1px solid rgba(99, 56, 6, 0.12);
+}
+
+.library-view__bulk-count {
+  font-size: 0.875rem;
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.library-view__bulk-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.library-view__bulk-button {
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background-color: white;
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.library-view__bulk-button:hover {
+  background-color: var(--color-bg-soft);
+}
+
+.library-view__bulk-button--danger {
+  background-color: rgba(180, 50, 50, 0.08);
+  color: #8C1F1F;
+  border-color: rgba(180, 50, 50, 0.32);
+}
+
+.library-view__bulk-button--danger:hover {
+  background-color: rgba(180, 50, 50, 0.18);
+}
+
+.library-view__bulk-button--danger-confirm {
+  background-color: #B43232;
+  color: white;
+  border-color: #8C1F1F;
+}
+
+.library-view__bulk-button--danger-confirm:hover {
+  background-color: #8C1F1F;
+}
+
+/* ---------------------------------------------------------------------------
+ * 主体
+ * ------------------------------------------------------------------------- */
+
+.library-view__body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 12px 16px;
+}
+
+.library-view__empty {
+  text-align: center;
+  padding: 60px 16px;
+  color: var(--color-text-soft);
+  font-size: 0.95rem;
+}
+
+/* ---------------------------------------------------------------------------
+ * 表格
+ * ------------------------------------------------------------------------- */
+
+.library-view__table-wrap {
+  background-color: white;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.library-view__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.library-view__table thead {
+  background-color: var(--color-bg-soft);
+}
+
+.library-view__table th {
+  padding: 10px 12px;
+  text-align: left;
+  font-weight: 600;
+  color: var(--color-text-soft);
+  font-size: 0.8125rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.library-view__table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+  vertical-align: middle;
+}
+
+.library-view__row:hover {
+  background-color: var(--color-bg-soft);
+}
+
+.library-view__row--selected {
+  background-color: rgba(250, 199, 117, 0.12);
+}
+
+.library-view__row--selected:hover {
+  background-color: rgba(250, 199, 117, 0.18);
+}
+
+.library-view__col-check {
+  width: 40px;
+}
+
+.library-view__col-cover {
+  width: 56px;
+}
+
+.library-view__col-name {
+  min-width: 200px;
+}
+
+.library-view__col-progress {
+  width: 160px;
+}
+
+.library-view__col-time {
+  width: 180px;
+  color: var(--color-text-soft);
+  white-space: nowrap;
+}
+
+.library-view__col-status {
+  width: 80px;
+}
+
+.library-view__col-actions {
+  width: 110px;
+  text-align: right;
+}
+
+.library-view__name-primary {
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.library-view__name-secondary {
+  color: var(--color-text-soft);
+  font-size: 0.8125rem;
+  margin-top: 2px;
+}
+
+.library-view__progress-text {
+  color: var(--color-text);
+  margin-bottom: 4px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------------------------------------------------------------------------
+ * 进度条（表格 + 卡片共用）
+ * ------------------------------------------------------------------------- */
+
+.library-view__progress-bar {
+  width: 100%;
+  height: 6px;
+  background-color: var(--color-bg-soft);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.library-view__progress-bar-fill {
+  height: 100%;
+  background-color: var(--color-text);
+  transition: width 200ms ease;
+}
+
+/* ---------------------------------------------------------------------------
+ * 状态徽章
+ * ------------------------------------------------------------------------- */
+
+.library-view__status-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.library-view__status-badge--airing {
+  background-color: #FAC775;
+  color: #633806;
+}
+
+.library-view__status-badge--finished {
+  background-color: var(--color-bg-soft);
+  color: var(--color-text-soft);
+}
+
+.library-view__status-badge--upcoming {
+  background-color: #B5D4F4;
+  color: #0C447C;
+}
+
+.library-view__status-badge--watching {
+  background-color: #9FE1CB;
+  color: #085041;
+}
+
+.library-view__status-badge--plan {
+  background-color: #B5D4F4;
+  color: #0C447C;
+}
+
+.library-view__status-badge--completed {
+  background-color: #C0DD97;
+  color: #27500A;
+}
+
+.library-view__status-badge--dropped {
+  background-color: var(--color-bg-soft);
+  color: var(--color-text-soft);
+}
+
+/* ---------------------------------------------------------------------------
+ * 操作按钮
+ * ------------------------------------------------------------------------- */
+
+.library-view__action-button {
+  padding: 5px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background-color: white;
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: 0.8125rem;
+  cursor: pointer;
+}
+
+.library-view__action-button:hover {
+  background-color: var(--color-bg-soft);
+}
+
+/* ---------------------------------------------------------------------------
+ * 封面缩略图
+ * ------------------------------------------------------------------------- */
+
+.library-view__cover {
+  display: block;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-bg-soft);
+  object-fit: cover;
+}
+
+.library-view__cover--row {
+  width: 40px;
+  height: 56px;
+}
+
+.library-view__cover--card {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  border-top-left-radius: var(--radius-md);
+  border-top-right-radius: var(--radius-md);
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  object-fit: cover;
+}
+
+.library-view__cover--fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+
+.library-view__cover--row.library-view__cover--fallback {
+  font-size: 1.1rem;
+}
+
+.library-view__cover--card.library-view__cover--fallback {
+  font-size: 3rem;
+}
+
+/* ---------------------------------------------------------------------------
+ * 卡片网格
+ * ------------------------------------------------------------------------- */
+
+.library-view__card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+.library-view__card {
+  position: relative;
+  width: 100%;
+  background-color: white;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform 150ms ease, box-shadow 150ms ease,
+    border-color 150ms ease;
+}
+
+.library-view__card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(42, 39, 35, 0.1);
+}
+
+.library-view__card--selected {
+  border-color: var(--color-text);
+  box-shadow: 0 0 0 2px rgba(42, 39, 35, 0.18);
+}
+
+.library-view__card-check {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 2;
+  width: 24px;
+  height: 24px;
+  background-color: rgba(255, 255, 255, 0.92);
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.library-view__card-check input {
+  cursor: pointer;
+}
+
+.library-view__card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  text-align: left;
+  color: inherit;
+  cursor: pointer;
+}
+
+.library-view__card-body:focus-visible {
+  outline: 2px solid var(--color-text);
+  outline-offset: -2px;
+}
+
+.library-view__card-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 10px 10px;
+  min-height: 0;
+}
+
+.library-view__card-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+}
+
+.library-view__card-progress {
+  font-size: 0.8125rem;
+  color: var(--color-text-soft);
+  font-variant-numeric: tabular-nums;
+}

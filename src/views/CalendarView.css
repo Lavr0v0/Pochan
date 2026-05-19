@@ -1,0 +1,443 @@
+/**
+ * CalendarView 日历视图样式
+ *
+ * 布局：
+ *   - 顶部 header：左侧月份导航，右侧「今天」按钮
+ *   - 周几标题行 + 主网格都使用 grid-template-columns: repeat(7, 1fr)
+ *   - 主网格的每行 minmax(110px, 1fr)，提供足够空间放缩略图与 goal 列表
+ *
+ * 颜色：
+ *   - 当月格子：白色背景 + var(--color-bg-soft) 边框
+ *   - 非当月格子：var(--color-bg-soft) 背景 + 文字降透明度
+ *   - 今日格子：左上角描边强调
+ *
+ * 快速记录弹层：与 AnimeDetailModal 同一组 z-index（1000 / 1200）
+ */
+
+.calendar-view {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  background-color: var(--color-bg);
+  padding: 16px;
+  box-sizing: border-box;
+  gap: 12px;
+}
+
+/* ---------------------------------------------------------------------------
+ * Header
+ * ------------------------------------------------------------------------- */
+
+.calendar-view__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.calendar-view__nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.calendar-view__nav-button {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background-color: white;
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.calendar-view__nav-button:hover {
+  background-color: var(--color-bg-soft);
+}
+
+.calendar-view__title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--color-text);
+  min-width: 8em;
+  text-align: center;
+}
+
+.calendar-view__today-button {
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background-color: white;
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.calendar-view__today-button:hover {
+  background-color: var(--color-bg-soft);
+}
+
+/* ---------------------------------------------------------------------------
+ * 周几标题行
+ * ------------------------------------------------------------------------- */
+
+.calendar-view__weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.calendar-view__weekday {
+  padding: 6px 0;
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-soft);
+}
+
+/* ---------------------------------------------------------------------------
+ * 月历主网格
+ * ------------------------------------------------------------------------- */
+
+.calendar-view__grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-auto-rows: minmax(110px, 1fr);
+  gap: 4px;
+  flex: 1;
+  min-height: 0;
+}
+
+.calendar-view__cell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px;
+  background-color: white;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  color: var(--color-text);
+  cursor: pointer;
+  overflow: hidden;
+  transition: background-color 120ms ease;
+}
+
+.calendar-view__cell:hover {
+  background-color: var(--color-bg-soft);
+}
+
+.calendar-view__cell--out {
+  background-color: var(--color-bg-soft);
+  color: var(--color-text-soft);
+}
+
+.calendar-view__cell--out .calendar-view__cell-day {
+  opacity: 0.55;
+}
+
+.calendar-view__cell--today {
+  border-color: var(--color-text);
+  border-width: 1.5px;
+}
+
+.calendar-view__cell-day {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+/* ---------------------------------------------------------------------------
+ * airing 缩略图列表
+ * ------------------------------------------------------------------------- */
+
+.calendar-view__airing-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.calendar-view__thumb {
+  width: 36px;
+  height: 48px;
+  padding: 0;
+  border: none;
+  background: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  overflow: hidden;
+  display: block;
+  box-shadow: 0 1px 4px rgba(42, 39, 35, 0.1);
+  transition: transform 120ms ease;
+}
+
+.calendar-view__thumb:hover {
+  transform: scale(1.06);
+}
+
+.calendar-view__thumb-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.calendar-view__thumb-fallback {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  font-weight: 700;
+  border-radius: inherit;
+}
+
+.calendar-view__airing-overflow {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-text-soft);
+  padding: 2px 4px;
+}
+
+/* ---------------------------------------------------------------------------
+ * goal 列表
+ * ------------------------------------------------------------------------- */
+
+.calendar-view__goal-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.calendar-view__goal-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: var(--radius-sm);
+  background-color: white;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.75rem;
+  color: var(--color-text);
+}
+
+.calendar-view__goal-row:hover {
+  background-color: var(--color-bg-soft);
+}
+
+.calendar-view__goal-cover {
+  width: 24px;
+  height: 32px;
+  border-radius: 4px;
+  object-fit: cover;
+  flex-shrink: 0;
+  background-color: var(--color-bg-soft);
+}
+
+.calendar-view__goal-cover--fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.calendar-view__goal-meta {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.calendar-view__goal-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 600;
+}
+
+.calendar-view__goal-progress {
+  width: 100%;
+  height: 4px;
+  background-color: rgba(0, 0, 0, 0.08);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.calendar-view__goal-progress-fill {
+  display: block;
+  height: 100%;
+  background-color: var(--color-text);
+  border-radius: inherit;
+  transition: width 200ms ease;
+}
+
+.calendar-view__goal-count {
+  font-size: 0.7rem;
+  color: var(--color-text-soft);
+}
+
+/* ---------------------------------------------------------------------------
+ * 快速记录弹层
+ * ------------------------------------------------------------------------- */
+
+.calendar-view__quick-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background-color: rgba(42, 39, 35, 0.32);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.calendar-view__quick-card {
+  position: relative;
+  z-index: 1200;
+  width: min(420px, 100%);
+  max-height: calc(100vh - 32px);
+  background-color: var(--color-bg);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 12px 32px rgba(42, 39, 35, 0.18);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.calendar-view__quick-header {
+  padding: 18px 20px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.calendar-view__quick-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.calendar-view__quick-hint {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--color-text-soft);
+}
+
+.calendar-view__quick-list {
+  list-style: none;
+  margin: 0;
+  padding: 0 8px;
+  overflow-y: auto;
+  flex: 1;
+  max-height: 50vh;
+}
+
+.calendar-view__quick-empty {
+  padding: 24px 12px;
+  text-align: center;
+  color: var(--color-text-soft);
+  font-size: 0.875rem;
+}
+
+.calendar-view__quick-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: var(--color-text);
+}
+
+.calendar-view__quick-item:hover {
+  background-color: var(--color-bg-soft);
+}
+
+.calendar-view__quick-item input[type='checkbox'] {
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.calendar-view__quick-item-name {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.calendar-view__quick-item-progress {
+  font-size: 0.75rem;
+  color: var(--color-text-soft);
+  flex-shrink: 0;
+}
+
+.calendar-view__quick-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 14px 20px;
+  background-color: var(--color-bg-soft);
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.calendar-view__quick-cancel {
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background-color: white;
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.calendar-view__quick-cancel:hover {
+  background-color: var(--color-bg);
+}
+
+.calendar-view__quick-submit {
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background-color: var(--color-text);
+  color: var(--color-bg);
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 150ms ease;
+}
+
+.calendar-view__quick-submit:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.calendar-view__quick-submit:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

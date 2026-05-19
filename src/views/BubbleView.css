@@ -1,0 +1,185 @@
+/**
+ * BubbleView 路由容器样式
+ *
+ * 顶部工具栏（搜索 + 添加按钮）+ 下方占满区域的气泡画布。
+ *
+ * 设计要点：
+ *   - .bubble-view 用 flex 列布局占满父容器；画布通过 flex: 1 + min-height: 0
+ *     吃掉剩余空间，避免子元素 height: 100% 在 flex 容器中失效。
+ *   - 工具栏使用 --color-bg-soft 与底部 1px 分隔线，与画布的米色背景形成
+ *     温和层次。
+ *   - 上下文菜单使用 fixed 定位 + z-index 1100；外层 modal（AddAnimeDialog /
+ *     AnimeDetailModal）使用 1000 / 1200 与之配套。
+ */
+
+.bubble-view {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+}
+
+.bubble-view__toolbar {
+  display: flex;
+  gap: 12px;
+  padding: 12px 16px;
+  align-items: center;
+  background-color: var(--color-bg-soft);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.bubble-view__search {
+  flex: 1;
+  max-width: 360px;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background-color: white;
+  color: var(--color-text);
+  font-family: inherit;
+}
+
+.bubble-view__search:focus {
+  outline: none;
+  border-color: var(--color-text-soft);
+}
+
+.bubble-view__add {
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background-color: var(--color-text);
+  color: var(--color-bg);
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 150ms ease;
+}
+
+.bubble-view__add:hover {
+  opacity: 0.9;
+}
+
+.bubble-view__canvas {
+  flex: 1;
+  min-height: 0;
+}
+
+/* ---------------------------------------------------------------------------
+ * 上下文菜单
+ * ------------------------------------------------------------------------- */
+
+.bubble-view__context-menu {
+  position: fixed;
+  z-index: 1100;
+  min-width: 140px;
+  padding: 4px 0;
+  background-color: white;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 24px rgba(42, 39, 35, 0.14);
+  font-size: 0.875rem;
+  color: var(--color-text);
+}
+
+.bubble-view__context-item {
+  display: block;
+  width: 100%;
+  padding: 8px 14px;
+  background: none;
+  border: none;
+  text-align: left;
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.bubble-view__context-item:hover,
+.bubble-view__context-item:focus-visible {
+  background-color: var(--color-bg-soft);
+  outline: none;
+}
+
+/* ---------------------------------------------------------------------------
+ * 上下文菜单 - 颜色选择阶段
+ *
+ * 由 BubbleContextMenu 在 stage === 'color' 时渲染：
+ *   - 4 列 x 2 行的 28px 圆形 swatch 网格（PALETTE 共 7 色，最后一格留空）
+ *   - 自选 <input type="color"> + 「重置为默认」按钮
+ * ------------------------------------------------------------------------- */
+
+.bubble-view__context-color-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 28px);
+  gap: 6px;
+  padding: 8px 14px;
+}
+
+.bubble-view__context-swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  padding: 0;
+  transition: transform 120ms ease, border-color 120ms ease;
+}
+
+.bubble-view__context-swatch:hover {
+  transform: scale(1.08);
+}
+
+.bubble-view__context-swatch--selected {
+  border-color: var(--color-text);
+}
+
+.bubble-view__context-color-extra {
+  display: flex;
+  gap: 8px;
+  padding: 4px 14px 8px;
+  align-items: center;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  margin-top: 4px;
+}
+
+.bubble-view__context-picker-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8125rem;
+  color: var(--color-text-soft);
+  cursor: pointer;
+}
+
+.bubble-view__context-picker-label input[type='color'] {
+  width: 24px;
+  height: 24px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: var(--radius-sm);
+  padding: 0;
+  cursor: pointer;
+  background: none;
+}
+
+.bubble-view__context-reset {
+  margin-left: auto;
+  padding: 4px 8px;
+  background: none;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 0.8125rem;
+  color: var(--color-text);
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+
+.bubble-view__context-reset:hover:not(:disabled) {
+  background-color: var(--color-bg-soft);
+}
+
+.bubble-view__context-reset:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

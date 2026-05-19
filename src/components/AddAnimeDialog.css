@@ -1,0 +1,379 @@
+/**
+ * AddAnimeDialog 样式
+ *
+ * 复用 BubbleView.css 的 overlay 设计语言：fixed 全屏、半透明背景、居中弹窗。
+ * z-index 与 BubbleView.css 保持一致：overlay 1000，弹窗主体 1200。
+ *
+ * 三个阶段共用 .add-anime-dialog__panel 主体容器；搜索阶段与配置阶段
+ * 在内部用 flex column 组织。候选列表 .add-anime-dialog__results 内部
+ * 用滚动而不是改弹窗高度，避免不同候选数量时弹窗大小跳动。
+ */
+
+.add-anime-dialog__overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background-color: rgba(42, 39, 35, 0.32);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.add-anime-dialog__panel {
+  position: relative;
+  z-index: 1200;
+  width: min(560px, calc(100vw - 32px));
+  max-height: min(640px, calc(100vh - 64px));
+  padding: 20px 24px;
+  background-color: var(--color-bg);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 12px 32px rgba(42, 39, 35, 0.18);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  overflow: hidden;
+}
+
+.add-anime-dialog__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.add-anime-dialog__title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.add-anime-dialog__close {
+  border: none;
+  background: none;
+  font-size: 1.4rem;
+  line-height: 1;
+  color: var(--color-text-soft);
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+}
+
+.add-anime-dialog__close:hover {
+  background-color: var(--color-bg-soft);
+  color: var(--color-text);
+}
+
+/* ---------------------------------------------------------------------------
+ * 搜索阶段
+ * ------------------------------------------------------------------------- */
+
+.add-anime-dialog__search {
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background-color: white;
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: 0.95rem;
+}
+
+.add-anime-dialog__search:focus {
+  outline: none;
+  border-color: var(--color-text-soft);
+}
+
+.add-anime-dialog__status {
+  font-size: 0.85rem;
+  color: var(--color-text-soft);
+  min-height: 1.2em;
+}
+
+.add-anime-dialog__error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background-color: rgba(220, 38, 38, 0.08);
+  color: #b91c1c;
+  font-size: 0.85rem;
+}
+
+.add-anime-dialog__retry {
+  padding: 4px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(185, 28, 28, 0.3);
+  background-color: white;
+  color: #b91c1c;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.add-anime-dialog__retry:hover {
+  background-color: rgba(220, 38, 38, 0.08);
+}
+
+.add-anime-dialog__results {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-right: 4px;
+}
+
+.add-anime-dialog__result {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  background-color: white;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  color: inherit;
+}
+
+.add-anime-dialog__result:hover,
+.add-anime-dialog__result:focus-visible {
+  background-color: var(--color-bg-soft);
+  outline: none;
+}
+
+.add-anime-dialog__result-cover {
+  width: 56px;
+  height: 78px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  flex-shrink: 0;
+  background-color: var(--color-bg-soft);
+}
+
+.add-anime-dialog__result-cover-fallback {
+  width: 56px;
+  height: 78px;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--color-text-soft);
+  background-color: var(--color-bg-soft);
+}
+
+.add-anime-dialog__result-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.add-anime-dialog__result-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.add-anime-dialog__result-name-ja {
+  font-size: 0.8rem;
+  color: var(--color-text-soft);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.add-anime-dialog__result-meta {
+  display: flex;
+  gap: 12px;
+  font-size: 0.78rem;
+  color: var(--color-text-soft);
+}
+
+.add-anime-dialog__rating {
+  color: #b45309;
+  font-weight: 600;
+}
+
+/* ---------------------------------------------------------------------------
+ * 配置阶段
+ * ------------------------------------------------------------------------- */
+
+.add-anime-dialog__configure {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.add-anime-dialog__subject {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.add-anime-dialog__subject-cover {
+  width: 80px;
+  height: 110px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  flex-shrink: 0;
+  background-color: var(--color-bg-soft);
+}
+
+.add-anime-dialog__subject-cover-fallback {
+  width: 80px;
+  height: 110px;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--color-text-soft);
+  background-color: var(--color-bg-soft);
+}
+
+.add-anime-dialog__subject-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.add-anime-dialog__subject-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.add-anime-dialog__subject-name-ja {
+  font-size: 0.85rem;
+  color: var(--color-text-soft);
+}
+
+.add-anime-dialog__subject-eps {
+  font-size: 0.85rem;
+  color: var(--color-text-soft);
+}
+
+.add-anime-dialog__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.add-anime-dialog__label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.add-anime-dialog__radio-group {
+  display: flex;
+  gap: 12px;
+  font-size: 0.9rem;
+  color: var(--color-text);
+}
+
+.add-anime-dialog__radio {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  cursor: pointer;
+}
+
+.add-anime-dialog__input,
+.add-anime-dialog__select {
+  padding: 7px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background-color: white;
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: 0.9rem;
+}
+
+.add-anime-dialog__input:focus,
+.add-anime-dialog__select:focus {
+  outline: none;
+  border-color: var(--color-text-soft);
+}
+
+.add-anime-dialog__field-error {
+  font-size: 0.78rem;
+  color: #b91c1c;
+}
+
+.add-anime-dialog__checkbox {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  font-size: 0.9rem;
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.add-anime-dialog__goal {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-bg-soft);
+}
+
+.add-anime-dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 4px;
+}
+
+.add-anime-dialog__button {
+  padding: 7px 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background-color: white;
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.add-anime-dialog__button:hover {
+  background-color: var(--color-bg-soft);
+}
+
+.add-anime-dialog__button--primary {
+  background-color: var(--color-text);
+  color: var(--color-bg);
+  border-color: var(--color-text);
+  font-weight: 600;
+}
+
+.add-anime-dialog__button--primary:hover {
+  opacity: 0.9;
+  background-color: var(--color-text);
+}
+
+.add-anime-dialog__button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}

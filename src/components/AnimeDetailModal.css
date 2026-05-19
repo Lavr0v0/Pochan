@@ -1,0 +1,406 @@
+/**
+ * AnimeDetailModal 样式
+ *
+ * 设计要点：
+ *   - overlay 与 BubbleView 的 placeholder overlay 用同一组 z-index（1000 / 1200），
+ *     确保和 BubbleView 既有层级一致。
+ *   - 卡片宽度约 520px，左侧封面列 ≈ 200×280，右侧信息列 flex: 1。
+ *   - 调色板使用 4×2 网格（七个 + 自选；放在网格旁），每个 swatch 32×32 圆形，
+ *     :focus-visible 显示蓝色 ring 以支持键盘导航。
+ *   - 删除按钮使用红色 tint，确认确认按钮颜色更深。
+ */
+
+.anime-detail-modal__overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background-color: rgba(42, 39, 35, 0.32);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.anime-detail-modal__card {
+  position: relative;
+  z-index: 1200;
+  width: min(520px, 100%);
+  max-height: calc(100vh - 32px);
+  background-color: var(--color-bg);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 12px 32px rgba(42, 39, 35, 0.18);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.anime-detail-modal__body {
+  display: flex;
+  gap: 20px;
+  padding: 24px;
+  overflow-y: auto;
+}
+
+/* ---------------------------------------------------------------------------
+ * 左列：封面 + 类型徽章
+ * ------------------------------------------------------------------------- */
+
+.anime-detail-modal__cover-col {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.anime-detail-modal__cover {
+  width: 180px;
+  height: 252px;
+  border-radius: var(--radius-md);
+  object-fit: cover;
+  display: block;
+  background-color: var(--color-bg-soft);
+  box-shadow: 0 4px 12px rgba(42, 39, 35, 0.08);
+}
+
+.anime-detail-modal__cover--fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.anime-detail-modal__cover-fallback-char {
+  font-size: 4rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.anime-detail-modal__status-badge {
+  font-size: 0.78rem;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+.anime-detail-modal__status-badge--airing {
+  background-color: #FAC775;
+  color: #633806;
+}
+
+.anime-detail-modal__status-badge--finished {
+  background-color: var(--color-bg-soft);
+  color: var(--color-text-soft);
+}
+
+/* ---------------------------------------------------------------------------
+ * 右列：标题 + 元信息 + 表单
+ * ------------------------------------------------------------------------- */
+
+.anime-detail-modal__info-col {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.anime-detail-modal__heading {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.anime-detail-modal__title {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--color-text);
+  line-height: 1.3;
+  word-break: break-word;
+}
+
+.anime-detail-modal__subtitle {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--color-text-soft);
+  word-break: break-word;
+}
+
+.anime-detail-modal__meta {
+  margin: 0;
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  row-gap: 4px;
+  column-gap: 12px;
+  font-size: 0.85rem;
+}
+
+.anime-detail-modal__meta-row {
+  display: contents;
+}
+
+.anime-detail-modal__meta dt {
+  color: var(--color-text-soft);
+}
+
+.anime-detail-modal__meta dd {
+  margin: 0;
+  color: var(--color-text);
+}
+
+.anime-detail-modal__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.anime-detail-modal__field-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-soft);
+}
+
+.anime-detail-modal__summary {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--color-text);
+  line-height: 1.6;
+  max-height: 120px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+}
+
+/* ---------------------------------------------------------------------------
+ * 已看集数行
+ * ------------------------------------------------------------------------- */
+
+.anime-detail-modal__watched-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.anime-detail-modal__icon-button {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background-color: white;
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.anime-detail-modal__icon-button:hover:not(:disabled) {
+  background-color: var(--color-bg-soft);
+}
+
+.anime-detail-modal__icon-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.anime-detail-modal__watched-input {
+  width: 80px;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background-color: white;
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.anime-detail-modal__watched-input:focus {
+  outline: none;
+  border-color: var(--color-text-soft);
+}
+
+.anime-detail-modal__watched-total {
+  color: var(--color-text-soft);
+  font-size: 0.9rem;
+}
+
+/* ---------------------------------------------------------------------------
+ * 笔记
+ * ------------------------------------------------------------------------- */
+
+.anime-detail-modal__notes {
+  width: 100%;
+  min-height: 72px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background-color: white;
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: 0.9rem;
+  resize: vertical;
+}
+
+.anime-detail-modal__notes:focus {
+  outline: none;
+  border-color: var(--color-text-soft);
+}
+
+/* ---------------------------------------------------------------------------
+ * 调色板
+ * ------------------------------------------------------------------------- */
+
+.anime-detail-modal__palette {
+  display: grid;
+  grid-template-columns: repeat(4, 32px);
+  grid-auto-rows: 32px;
+  gap: 8px;
+}
+
+.anime-detail-modal__swatch {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  padding: 0;
+  transition: transform 120ms ease, border-color 120ms ease;
+}
+
+.anime-detail-modal__swatch:hover {
+  transform: scale(1.08);
+}
+
+.anime-detail-modal__swatch--selected {
+  border-color: var(--color-text);
+}
+
+.anime-detail-modal__swatch:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(11, 68, 124, 0.45);
+}
+
+.anime-detail-modal__color-extra {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.anime-detail-modal__picker-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: var(--color-text-soft);
+  cursor: pointer;
+}
+
+.anime-detail-modal__picker-label input[type='color'] {
+  width: 32px;
+  height: 32px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: var(--radius-sm);
+  padding: 0;
+  background-color: white;
+  cursor: pointer;
+}
+
+.anime-detail-modal__reset-color {
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background-color: white;
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.anime-detail-modal__reset-color:hover:not(:disabled) {
+  background-color: var(--color-bg-soft);
+}
+
+.anime-detail-modal__reset-color:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ---------------------------------------------------------------------------
+ * 底部按钮区
+ * ------------------------------------------------------------------------- */
+
+.anime-detail-modal__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 24px;
+  background-color: var(--color-bg-soft);
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.anime-detail-modal__close-button {
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background-color: white;
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.anime-detail-modal__close-button:hover {
+  background-color: var(--color-bg);
+}
+
+.anime-detail-modal__delete-button {
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(180, 50, 50, 0.32);
+  background-color: rgba(180, 50, 50, 0.08);
+  color: #8C1F1F;
+  font-family: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.anime-detail-modal__delete-button:hover {
+  background-color: rgba(180, 50, 50, 0.18);
+}
+
+.anime-detail-modal__delete-button--confirm {
+  background-color: #B43232;
+  color: white;
+  border-color: #8C1F1F;
+}
+
+.anime-detail-modal__delete-button--confirm:hover {
+  background-color: #8C1F1F;
+}
+
+/* 删除确认行 */
+.anime-detail-modal__confirm {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.anime-detail-modal__confirm-text {
+  font-size: 0.9rem;
+  color: var(--color-text);
+}
+
+.anime-detail-modal__confirm-actions {
+  display: flex;
+  gap: 8px;
+}

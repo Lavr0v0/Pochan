@@ -1,0 +1,196 @@
+/**
+ * Bubble 单气泡样式 — 重新设计
+ *
+ * 设计理念：
+ *   - 气泡只显示圆形裁切的封面图，干净简洁
+ *   - 外围一圈环形进度条（SVG stroke）表示观看进度
+ *   - 鼠标悬停时显示名字 tooltip
+ *   - 玻璃质感：内发光 + 半透明边框 + 柔和阴影
+ *   - 位置通过 CSS 变量 --bubble-x / --bubble-y 驱动
+ */
+
+.bubble {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--bubble-size, 72px);
+  height: var(--bubble-size, 72px);
+  border-radius: 50%;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+
+  transform: translate(var(--bubble-x, 0px), var(--bubble-y, 0px));
+  transition: opacity 300ms ease, box-shadow 300ms ease;
+  will-change: transform;
+
+  /* 玻璃质感 */
+  background: var(--bubble-bg, #CECBF6);
+  box-shadow:
+    0 4px 16px rgba(42, 39, 35, 0.12),
+    inset 0 2px 8px rgba(255, 255, 255, 0.3),
+    0 0 0 2px rgba(255, 255, 255, 0.4);
+  opacity: var(--bubble-opacity, 1);
+
+  /* 内容布局 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+}
+
+.bubble:hover {
+  box-shadow:
+    0 6px 24px rgba(42, 39, 35, 0.18),
+    inset 0 2px 8px rgba(255, 255, 255, 0.4),
+    0 0 0 3px rgba(255, 255, 255, 0.6);
+  transform: translate(var(--bubble-x, 0px), var(--bubble-y, 0px)) scale(1.05);
+}
+
+/* 点击反馈 */
+.bubble.is-active {
+  animation: bubble-pop 200ms ease-out;
+}
+
+@keyframes bubble-pop {
+  0% { transform: translate(var(--bubble-x, 0px), var(--bubble-y, 0px)) scale(1); }
+  40% { transform: translate(var(--bubble-x, 0px), var(--bubble-y, 0px)) scale(1.15); }
+  100% { transform: translate(var(--bubble-x, 0px), var(--bubble-y, 0px)) scale(1); }
+}
+
+/* 入场动画 */
+.bubble.bubble--entering {
+  animation: bubble-enter 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes bubble-enter {
+  from {
+    transform: translate(var(--bubble-x, 0px), var(--bubble-y, 0px)) scale(0);
+    opacity: 0;
+  }
+  to {
+    transform: translate(var(--bubble-x, 0px), var(--bubble-y, 0px)) scale(1);
+    opacity: var(--bubble-opacity, 1);
+  }
+}
+
+/* 退出动画：看完（向上飘出 + 缩小 + 淡出） */
+.bubble.bubble--completed {
+  animation: bubble-float-away 1.2s ease-in forwards;
+  pointer-events: none;
+}
+
+@keyframes bubble-float-away {
+  0% {
+    transform: translate(var(--bubble-x, 0px), var(--bubble-y, 0px)) scale(1);
+    opacity: var(--bubble-opacity, 1);
+  }
+  60% {
+    transform: translate(var(--bubble-x, 0px), calc(var(--bubble-y, 0px) - 80px)) scale(1.1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate(var(--bubble-x, 0px), calc(var(--bubble-y, 0px) - 200px)) scale(0.3);
+    opacity: 0;
+  }
+}
+
+/* 退出动画：弃番（向下沉 + 变灰 + 淡出） */
+.bubble.bubble--dropped {
+  animation: bubble-sink 1s ease-in forwards;
+  pointer-events: none;
+}
+
+@keyframes bubble-sink {
+  0% {
+    transform: translate(var(--bubble-x, 0px), var(--bubble-y, 0px)) scale(1);
+    opacity: var(--bubble-opacity, 1);
+    filter: none;
+  }
+  50% {
+    filter: grayscale(0.8);
+  }
+  100% {
+    transform: translate(var(--bubble-x, 0px), calc(var(--bubble-y, 0px) + 150px)) scale(0.5);
+    opacity: 0;
+    filter: grayscale(1);
+  }
+}
+
+/* 封面图：圆形裁切，占满气泡 */
+.bubble__cover {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  pointer-events: none;
+  display: block;
+}
+
+/* 封面加载失败时的占位 */
+.bubble__fallback {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--bubble-text, #3C3489);
+  background: var(--bubble-bg, #CECBF6);
+  pointer-events: none;
+}
+
+/* 环形进度条（SVG 覆盖在气泡上方） */
+.bubble__progress-ring {
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  width: calc(var(--bubble-size, 72px) + 8px);
+  height: calc(var(--bubble-size, 72px) + 8px);
+  pointer-events: none;
+  transform: rotate(-90deg);
+}
+
+.bubble__progress-ring-bg {
+  fill: none;
+  stroke: rgba(0, 0, 0, 0.06);
+  stroke-width: 3;
+}
+
+.bubble__progress-ring-fill {
+  fill: none;
+  stroke: var(--bubble-text, #3C3489);
+  stroke-width: 3;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 400ms ease;
+}
+
+/* 悬停 tooltip（名字 + 进度） */
+.bubble__tooltip {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 6px 12px;
+  background: rgba(42, 39, 35, 0.88);
+  color: white;
+  font-size: 0.78rem;
+  font-weight: 500;
+  border-radius: 6px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 150ms ease;
+  backdrop-filter: blur(4px);
+}
+
+.bubble:hover .bubble__tooltip {
+  opacity: 1;
+}
+
+.bubble__tooltip-progress {
+  opacity: 0.7;
+  margin-left: 6px;
+}

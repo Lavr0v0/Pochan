@@ -1,0 +1,24 @@
+node_modules
+dist
+dist-ssr
+*.local
+
+# Rust
+src-tauri/target/
+
+# Editor
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Kiro internal (not needed in public repo)
+.kiro/
+
+# Generated
+gen-icons.cjs

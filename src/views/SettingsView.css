@@ -1,0 +1,239 @@
+/**
+ * SettingsView 设置页样式
+ *
+ * 视觉语言：
+ *   - 顶部 header 与 LibraryView 工具栏一致：--color-bg-soft 背景 + 底部分割线
+ *   - 主体 .settings-view__body 居中容器，最大宽度 720px
+ *   - 三个功能区作为 .settings-view__card：白底 + 圆角 + 浅描边
+ *   - 每张卡片含 heading / description / 操作行 / 状态消息
+ *   - 状态消息颜色：success（深绿）、error（深红）、info（次级灰棕）
+ *   - 内联确认行模式与 AnimeDetailModal 删除确认保持一致：
+ *       米色提示文本 + 取消（白底）+ 危险确认（深红）
+ *
+ * 不引入新 CSS 变量；尽可能复用 --color-bg / --color-bg-soft / --color-text 等。
+ */
+
+.settings-view {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  background-color: var(--color-bg);
+  overflow: hidden;
+}
+
+/* ---------------------------------------------------------------------------
+ * Header
+ * ------------------------------------------------------------------------- */
+
+.settings-view__header {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 14px 16px;
+  background-color: var(--color-bg-soft);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.settings-view__title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.settings-view__subtitle {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--color-text-soft);
+}
+
+/* ---------------------------------------------------------------------------
+ * Body / Cards
+ * ------------------------------------------------------------------------- */
+
+.settings-view__body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 24px 16px;
+}
+
+.settings-view__inner {
+  max-width: 720px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.settings-view__card {
+  background-color: white;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.settings-view__card-heading {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.settings-view__card-desc {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--color-text-soft);
+  line-height: 1.5;
+}
+
+/* ---------------------------------------------------------------------------
+ * Action row
+ * ------------------------------------------------------------------------- */
+
+.settings-view__actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.settings-view__button {
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background-color: white;
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.settings-view__button:hover:not(:disabled) {
+  background-color: var(--color-bg-soft);
+}
+
+.settings-view__button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.settings-view__input {
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background-color: white;
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: 0.9rem;
+  width: 200px;
+}
+
+.settings-view__input:focus {
+  outline: none;
+  border-color: var(--color-text-soft);
+}
+
+.settings-view__input:disabled {
+  opacity: 0.5;
+}
+
+.settings-view__button--primary {
+  background-color: var(--color-text);
+  color: var(--color-bg);
+  border-color: var(--color-text);
+}
+
+.settings-view__button--primary:hover:not(:disabled) {
+  background-color: #1f1d1a;
+}
+
+.settings-view__button--danger {
+  background-color: rgba(180, 50, 50, 0.08);
+  color: #8C1F1F;
+  border-color: rgba(180, 50, 50, 0.32);
+}
+
+.settings-view__button--danger:hover:not(:disabled) {
+  background-color: rgba(180, 50, 50, 0.18);
+}
+
+.settings-view__button--danger-confirm {
+  background-color: #B43232;
+  color: white;
+  border-color: #8C1F1F;
+}
+
+.settings-view__button--danger-confirm:hover:not(:disabled) {
+  background-color: #8C1F1F;
+}
+
+/* ---------------------------------------------------------------------------
+ * Confirm row（清空确认）
+ * ------------------------------------------------------------------------- */
+
+.settings-view__confirm {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 10px 12px;
+  background-color: rgba(180, 50, 50, 0.06);
+  border: 1px solid rgba(180, 50, 50, 0.18);
+  border-radius: var(--radius-sm);
+}
+
+.settings-view__confirm-text {
+  font-size: 0.9rem;
+  color: var(--color-text);
+}
+
+.settings-view__confirm-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* ---------------------------------------------------------------------------
+ * Status message
+ * ------------------------------------------------------------------------- */
+
+.settings-view__status {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  word-break: break-word;
+}
+
+.settings-view__status--success {
+  background-color: rgba(39, 80, 10, 0.08);
+  color: #27500A;
+  border-color: rgba(39, 80, 10, 0.18);
+}
+
+.settings-view__status--error {
+  background-color: rgba(180, 50, 50, 0.08);
+  color: #8C1F1F;
+  border-color: rgba(180, 50, 50, 0.24);
+}
+
+.settings-view__status--info {
+  background-color: var(--color-bg-soft);
+  color: var(--color-text-soft);
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+.settings-view__status code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.8rem;
+  background-color: rgba(0, 0, 0, 0.05);
+  padding: 1px 4px;
+  border-radius: 4px;
+}

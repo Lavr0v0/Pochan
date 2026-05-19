@@ -1,0 +1,80 @@
+/**
+ * Sidebar 样式
+ *
+ * 设计要点：
+ *   - 固定宽度 176px，占满父容器高度（flex 子项 + height: 100%）
+ *   - 背景使用 --color-bg-soft 与画布米色主背景拉开层次
+ *   - 每个导航按钮垂直排列，左侧 3px 透明 border，激活时变 --color-text，
+ *     形成「左侧强调条」视觉
+ *   - 焦点环使用 outline，保证键盘 Tab 可见
+ */
+
+.sidebar {
+  width: 176px;
+  flex-shrink: 0;
+  height: 100%;
+  background-color: var(--color-bg-soft);
+  border-right: 1px solid rgba(0, 0, 0, 0.05);
+  padding: 16px 0;
+  overflow-y: auto;
+}
+
+.sidebar__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sidebar__item {
+  margin: 0;
+}
+
+.sidebar__link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 16px 10px 13px; /* 左 13 = 16 - 3px border 占位 */
+  border: none;
+  border-left: 3px solid transparent;
+  background: none;
+  font-family: inherit;
+  font-size: 0.9375rem;
+  color: var(--color-text-soft);
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 120ms ease, color 120ms ease,
+    border-color 120ms ease;
+}
+
+.sidebar__link:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+  color: var(--color-text);
+}
+
+.sidebar__link:focus-visible {
+  outline: 2px solid var(--color-text);
+  outline-offset: -2px;
+}
+
+.sidebar__link--active {
+  border-left-color: var(--color-text);
+  color: var(--color-text);
+  background-color: rgba(0, 0, 0, 0.05);
+  font-weight: 600;
+}
+
+.sidebar__icon {
+  font-size: 1.125rem;
+  line-height: 1;
+  width: 20px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.sidebar__label {
+  flex: 1;
+}

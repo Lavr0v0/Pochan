@@ -1,0 +1,126 @@
+/**
+ * App 布局 — 左右分屏
+ *
+ * 左侧：功能面板 360px（番剧库/日历/设置）
+ * 右侧：气泡画布（flex: 1 占满剩余空间）
+ */
+
+.app {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+/* ---------------------------------------------------------------------------
+ * 左侧面板
+ * ------------------------------------------------------------------------- */
+
+.app__panel {
+  width: 60%;
+  flex-shrink: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-bg);
+  border-right: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.app__panel-tabs {
+  display: flex;
+  gap: 0;
+  padding: 0;
+  background-color: var(--color-bg-soft);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.app__panel-tab {
+  flex: 1;
+  padding: 12px 8px;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: 0.85rem;
+  color: var(--color-text-soft);
+  cursor: pointer;
+  transition: background-color 120ms ease, color 120ms ease;
+  border-bottom: 2px solid transparent;
+}
+
+.app__panel-tab:hover {
+  background-color: rgba(0, 0, 0, 0.03);
+  color: var(--color-text);
+}
+
+.app__panel-tab--active {
+  color: var(--color-text);
+  font-weight: 600;
+  border-bottom-color: var(--color-text);
+}
+
+.app__panel-content {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* ---------------------------------------------------------------------------
+ * 右侧气泡画布
+ * ------------------------------------------------------------------------- */
+
+.app__canvas {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  position: relative;
+}
+
+/* FAB 添加按钮 */
+.app__fab {
+  position: absolute;
+  bottom: 24px;
+  right: 24px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: none;
+  background-color: var(--color-text);
+  color: var(--color-bg);
+  font-size: 1.8rem;
+  font-weight: 300;
+  cursor: pointer;
+  box-shadow:
+    0 4px 16px rgba(42, 39, 35, 0.2),
+    0 8px 32px rgba(42, 39, 35, 0.1);
+  transition: transform 150ms ease, box-shadow 150ms ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.app__fab:hover {
+  transform: scale(1.08);
+  box-shadow:
+    0 6px 20px rgba(42, 39, 35, 0.25),
+    0 12px 40px rgba(42, 39, 35, 0.15);
+}
+
+.app__fab:active {
+  transform: scale(0.95);
+}
+
+/* ---------------------------------------------------------------------------
+ * 加载占位
+ * ------------------------------------------------------------------------- */
+
+.app__loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  width: 100vw;
+  color: var(--color-text-soft);
+  font-size: 1rem;
+  background-color: var(--color-bg);
+}
