@@ -1,67 +1,132 @@
 /**
- * 全局样式与 CSS 变量
+ * Pochan Design Tokens
  *
- * 支持三种模式：浅色（默认）/ 深色 / 跟随系统
- * 通过 html[data-theme] 属性切换主题
+ * 主题通过 html[data-theme] 切换。
+ * 默认 paper（暖白纸张），ink（深色），sakura（轻粉），marine（蓝灰）。
  */
 
 :root {
-  /* 浅色主题（默认） */
+  /* Paper 主题（默认） */
   --color-bg: #FAF7F2;
   --color-bg-soft: #F3EFE8;
+  --color-bg-surface: #FFFFFF;
+  --color-bg-surface-hover: #F8F5F0;
+
   --color-text: #2A2723;
   --color-text-soft: #6B665E;
+  --color-text-muted: #9E9890;
+
   --color-border: rgba(0, 0, 0, 0.06);
   --color-border-strong: rgba(0, 0, 0, 0.12);
 
+  --color-accent: #5B7553;
+  --color-accent-soft: rgba(91, 117, 83, 0.1);
+
+  --color-danger: #B43232;
+  --color-danger-soft: rgba(180, 50, 50, 0.08);
+  --color-success: #3A7D44;
+  --color-success-soft: rgba(58, 125, 68, 0.08);
+  --color-warning: #C4841D;
+  --color-warning-soft: rgba(196, 132, 29, 0.08);
+
   /* 圆角 */
+  --radius-xs: 4px;
   --radius-sm: 6px;
   --radius-md: 10px;
-  --radius-lg: 16px;
+  --radius-lg: 14px;
 
-  /* 字体栈 */
-  --font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC',
-                 'Microsoft YaHei', system-ui, sans-serif;
+  /* 阴影 */
+  --shadow-panel: 0 1px 3px rgba(0, 0, 0, 0.04);
+  --shadow-popover: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-floating: 0 8px 24px rgba(0, 0, 0, 0.1);
+
+  /* 字体 */
+  --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+  --font-mono: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
 }
 
-/* 深色主题 */
+/* Ink 深色主题 */
 html[data-theme="dark"] {
-  --color-bg: #1A1A1E;
-  --color-bg-soft: #242428;
-  --color-text: #E8E4DF;
+  --color-bg: #1C1C1F;
+  --color-bg-soft: #252528;
+  --color-bg-surface: #2C2C30;
+  --color-bg-surface-hover: #333337;
+
+  --color-text: #E4E0DB;
   --color-text-soft: #9B9590;
-  --color-border: rgba(255, 255, 255, 0.08);
-  --color-border-strong: rgba(255, 255, 255, 0.15);
+  --color-text-muted: #6B665E;
+
+  --color-border: rgba(255, 255, 255, 0.07);
+  --color-border-strong: rgba(255, 255, 255, 0.14);
+
+  --color-accent: #8BAF82;
+  --color-accent-soft: rgba(139, 175, 130, 0.12);
+
+  --color-danger: #E05555;
+  --color-danger-soft: rgba(224, 85, 85, 0.1);
+  --color-success: #6BBF73;
+  --color-success-soft: rgba(107, 191, 115, 0.1);
+  --color-warning: #E0A84C;
+  --color-warning-soft: rgba(224, 168, 76, 0.1);
+
+  --shadow-panel: 0 1px 3px rgba(0, 0, 0, 0.2);
+  --shadow-popover: 0 4px 12px rgba(0, 0, 0, 0.3);
+  --shadow-floating: 0 8px 24px rgba(0, 0, 0, 0.4);
 }
 
-/* 粉色主题 */
+/* Sakura 樱花主题 */
 html[data-theme="pink"] {
-  --color-bg: #FFF0F3;
-  --color-bg-soft: #FFE0E6;
-  --color-text: #4A1942;
-  --color-text-soft: #8B5E83;
-  --color-border: rgba(219, 112, 147, 0.15);
-  --color-border-strong: rgba(219, 112, 147, 0.3);
+  --color-bg: #FDF5F7;
+  --color-bg-soft: #F9ECEF;
+  --color-bg-surface: #FFFFFF;
+  --color-bg-surface-hover: #FDF0F3;
+
+  --color-text: #3D2832;
+  --color-text-soft: #7A5B66;
+  --color-text-muted: #B08E99;
+
+  --color-border: rgba(180, 80, 110, 0.08);
+  --color-border-strong: rgba(180, 80, 110, 0.16);
+
+  --color-accent: #C06080;
+  --color-accent-soft: rgba(192, 96, 128, 0.1);
 }
 
-/* 蓝色主题 */
+/* Marine 海蓝主题 */
 html[data-theme="blue"] {
-  --color-bg: #F0F4FF;
-  --color-bg-soft: #E0EAFF;
-  --color-text: #1A2744;
-  --color-text-soft: #5B6E8A;
-  --color-border: rgba(66, 133, 244, 0.12);
-  --color-border-strong: rgba(66, 133, 244, 0.25);
+  --color-bg: #F4F6FA;
+  --color-bg-soft: #EAEFF5;
+  --color-bg-surface: #FFFFFF;
+  --color-bg-surface-hover: #F0F3F8;
+
+  --color-text: #1E2A3A;
+  --color-text-soft: #5A6B7D;
+  --color-text-muted: #8E9BAA;
+
+  --color-border: rgba(40, 80, 140, 0.08);
+  --color-border-strong: rgba(40, 80, 140, 0.15);
+
+  --color-accent: #4A7FB5;
+  --color-accent-soft: rgba(74, 127, 181, 0.1);
 }
 
-/* 金色主题 */
+/* Gold 金色主题 */
 html[data-theme="gold"] {
-  --color-bg: #FFFDF5;
-  --color-bg-soft: #FFF8E1;
-  --color-text: #3D2E00;
-  --color-text-soft: #7A6B3A;
-  --color-border: rgba(184, 134, 11, 0.12);
-  --color-border-strong: rgba(184, 134, 11, 0.25);
+  --color-bg: #FDFBF5;
+  --color-bg-soft: #F9F4E8;
+  --color-bg-surface: #FFFFFF;
+  --color-bg-surface-hover: #FBF7EE;
+
+  --color-text: #3D3420;
+  --color-text-soft: #7A6B4A;
+  --color-text-muted: #B0A080;
+
+  --color-border: rgba(160, 120, 30, 0.08);
+  --color-border-strong: rgba(160, 120, 30, 0.16);
+
+  --color-accent: #A07820;
+  --color-accent-soft: rgba(160, 120, 32, 0.1);
 }
 
 /* 基础重置 */
@@ -79,20 +144,29 @@ body,
 body {
   background-color: var(--color-bg);
   color: var(--color-text);
-  font-family: var(--font-family);
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  /* 移动端：禁止文本选择拖拽干扰触摸交互 */
   -webkit-user-select: none;
   user-select: none;
-  /* 移动端：禁止下拉刷新 */
   overscroll-behavior: none;
-  /* 主题切换过渡 */
   transition: background-color 200ms ease, color 200ms ease;
 }
 
-/* 允许输入框和文本区域选择文本 */
-input, textarea, [contenteditable] {
+input, textarea, select, [contenteditable] {
   -webkit-user-select: text;
   user-select: text;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

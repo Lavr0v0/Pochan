@@ -132,7 +132,32 @@ function App(): JSX.Element {
           }
         }}
       >
+        <span className="app__titlebar-title">Pochan</span>
         <div className="app__titlebar-controls">
+          <button
+            className="app__titlebar-btn"
+            aria-label="最小化"
+            onMouseDown={(e) => e.stopPropagation()}
+            onClick={() => {
+              import('@tauri-apps/api/window').then(({ getCurrentWindow }) => {
+                getCurrentWindow().minimize();
+              });
+            }}
+          >
+            <svg width="10" height="1" viewBox="0 0 10 1"><rect fill="currentColor" width="10" height="1"/></svg>
+          </button>
+          <button
+            className="app__titlebar-btn"
+            aria-label="最大化"
+            onMouseDown={(e) => e.stopPropagation()}
+            onClick={() => {
+              import('@tauri-apps/api/window').then(({ getCurrentWindow }) => {
+                getCurrentWindow().toggleMaximize();
+              });
+            }}
+          >
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1"><rect x="0.5" y="0.5" width="9" height="9"/></svg>
+          </button>
           <button
             className="app__titlebar-btn app__titlebar-btn--close"
             aria-label="关闭"
@@ -142,27 +167,9 @@ function App(): JSX.Element {
                 getCurrentWindow().close();
               });
             }}
-          />
-          <button
-            className="app__titlebar-btn app__titlebar-btn--minimize"
-            aria-label="最小化"
-            onMouseDown={(e) => e.stopPropagation()}
-            onClick={() => {
-              import('@tauri-apps/api/window').then(({ getCurrentWindow }) => {
-                getCurrentWindow().minimize();
-              });
-            }}
-          />
-          <button
-            className="app__titlebar-btn app__titlebar-btn--maximize"
-            aria-label="最大化"
-            onMouseDown={(e) => e.stopPropagation()}
-            onClick={() => {
-              import('@tauri-apps/api/window').then(({ getCurrentWindow }) => {
-                getCurrentWindow().toggleMaximize();
-              });
-            }}
-          />
+          >
+            <svg width="10" height="10" viewBox="0 0 10 10" stroke="currentColor" strokeWidth="1.2"><line x1="1" y1="1" x2="9" y2="9"/><line x1="9" y1="1" x2="1" y2="9"/></svg>
+          </button>
         </div>
       </div>
       {/* 主内容区 */}

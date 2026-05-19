@@ -49,7 +49,11 @@ export function setStoredTheme(mode: ThemeMode): void {
 
 /** 应用主题到 DOM */
 export function applyTheme(mode: ThemeMode): void {
-  document.documentElement.setAttribute('data-theme', mode);
+  if (mode === 'light') {
+    document.documentElement.removeAttribute('data-theme');
+  } else {
+    document.documentElement.setAttribute('data-theme', mode);
+  }
 }
 
 /** 初始化：读取存储并应用 */
