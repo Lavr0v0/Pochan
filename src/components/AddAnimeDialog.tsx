@@ -225,6 +225,8 @@ export function AddAnimeDialog(props: AddAnimeDialogProps): JSX.Element | null {
 
   // 表单提交错误（提交瞬间设置；输入变化清除）
   const [submitError, setSubmitError] = useState<string | null>(null);
+  // 集数未知提示
+  const [unknownEpsWarning, setUnknownEpsWarning] = useState(false);
 
   // -------------------------------------------------------------------------
   // 打开 / 关闭：每次重新打开重置全部状态
@@ -426,7 +428,12 @@ export function AddAnimeDialog(props: AddAnimeDialogProps): JSX.Element | null {
         tracked.totalEpisodes = form._airedEpisodes;
       }
       addAnime(tracked);
-      onClose();
+      // 集数未知时提示用户
+      if (tracked.totalEpisodes === 0) {
+        setUnknownEpsWarning(true);
+      } else {
+        onClose();
+      }
     },
     [stage, form, validateForm, addAnime, onClose],
   );
@@ -489,6 +496,25 @@ export function AddAnimeDialog(props: AddAnimeDialogProps): JSX.Element | null {
             onSubmit={handleSubmit}
             onBack={handleBackToSearch}
           />
+        )}
+
+        {/* 集数未知提示 */}
+        {unknownEpsWarning && (
+          <div className="add-anime-dialog__warning-overlay">
+            <div className="add-anime-dialog__warning-card">
+              <p className="add-anime-dialog__warning-text">
+                该番剧集数未知，无法自动判断是否看完。<br/>
+                看完时请在详情中手动将状态改为「看完」。
+              </p>
+              <button
+                type="button"
+                className="add-anime-dialog__button add-anime-dialog__button--primary"
+                onClick={() => { setUnknownEpsWarning(false); onClose(); }}
+              >
+                知道了
+              </button>
+            </div>
+          </div>
         )}
       </div>
     </div>

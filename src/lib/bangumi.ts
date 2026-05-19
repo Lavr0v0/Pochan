@@ -468,7 +468,10 @@ export async function importFromBangumi(username: string): Promise<TrackedAnime[
       watchedEpisodes: item.ep_status ?? 0,
       lastWatchedAt: now,
       addedAt: now,
-      status: totalEpisodes > 0 && item.ep_status >= totalEpisodes ? 'finished' : 'airing',
+      status: inferStatus({
+        ...subject,
+        total_episodes: totalEpisodes,
+      } as BangumiSubject),
       watchStatus,
       airDay,
       summary: subject.summary ?? undefined,
