@@ -10,6 +10,71 @@
   height: 100vh;
   width: 100vw;
   overflow: hidden;
+  flex-direction: column;
+}
+
+/* ---------------------------------------------------------------------------
+ * 自定义标题栏
+ * ------------------------------------------------------------------------- */
+
+.app__titlebar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 32px;
+  flex-shrink: 0;
+  background-color: var(--color-bg-soft);
+  border-bottom: 1px solid var(--color-border);
+  padding-left: 12px;
+  -webkit-app-region: drag;
+}
+
+.app__titlebar-title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-text-soft);
+  pointer-events: none;
+}
+
+.app__titlebar-controls {
+  display: flex;
+  height: 100%;
+  -webkit-app-region: no-drag;
+}
+
+.app__titlebar-btn {
+  width: 46px;
+  height: 100%;
+  border: none;
+  background: none;
+  color: var(--color-text-soft);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: background-color 100ms ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.app__titlebar-btn:hover {
+  background-color: var(--color-border-strong);
+  color: var(--color-text);
+}
+
+.app__titlebar-btn--close:hover {
+  background-color: #e81123;
+  color: white;
+}
+
+/* ---------------------------------------------------------------------------
+ * 主内容区（标题栏下方）
+ * ------------------------------------------------------------------------- */
+
+.app__body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
 }
 
 /* ---------------------------------------------------------------------------
@@ -142,14 +207,19 @@
  * =========================================================================== */
 
 @media (max-width: 768px) {
-  .app {
+  .app__titlebar {
+    display: none;
+  }
+
+  .app__body {
     flex-direction: column;
   }
 
   /* 移动端：面板占满全屏（减去底部导航高度） */
   .app__panel {
     width: 100%;
-    height: calc(100% - 56px);
+    flex: 1;
+    min-height: 0;
     border-right: none;
   }
 
@@ -165,7 +235,8 @@
   /* 移动端：气泡画布也占满全屏 */
   .app__canvas {
     width: 100%;
-    height: calc(100% - 56px);
+    flex: 1;
+    min-height: 0;
   }
 
   /* 隐藏非活跃视图 */

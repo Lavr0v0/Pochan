@@ -117,6 +117,47 @@ function App(): JSX.Element {
 
   return (
     <div className="app">
+      {/* 自定义标题栏 */}
+      <div className="app__titlebar" data-tauri-drag-region>
+        <span className="app__titlebar-title" data-tauri-drag-region>Pochan</span>
+        <div className="app__titlebar-controls">
+          <button
+            className="app__titlebar-btn"
+            aria-label="最小化"
+            onClick={() => {
+              import('@tauri-apps/api/window').then(({ getCurrentWindow }) => {
+                getCurrentWindow().minimize();
+              });
+            }}
+          >
+            &#x2013;
+          </button>
+          <button
+            className="app__titlebar-btn"
+            aria-label="最大化"
+            onClick={() => {
+              import('@tauri-apps/api/window').then(({ getCurrentWindow }) => {
+                getCurrentWindow().toggleMaximize();
+              });
+            }}
+          >
+            &#x25A1;
+          </button>
+          <button
+            className="app__titlebar-btn app__titlebar-btn--close"
+            aria-label="关闭"
+            onClick={() => {
+              import('@tauri-apps/api/window').then(({ getCurrentWindow }) => {
+                getCurrentWindow().close();
+              });
+            }}
+          >
+            &#x2715;
+          </button>
+        </div>
+      </div>
+      {/* 主内容区 */}
+      <div className="app__body">
       {/* 左侧面板（移动端：非 bubble tab 时显示） */}
       <div className={`app__panel${isMobile && mobileTab === 'bubble' ? ' app__panel--hidden' : ''}`}>
         <div className="app__panel-tabs">
@@ -162,6 +203,7 @@ function App(): JSX.Element {
         >
           +
         </button>
+      </div>
       </div>
 
       {/* 移动端底部导航 */}
