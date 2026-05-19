@@ -310,7 +310,7 @@ export function SettingsView(): JSX.Element {
           <section className="settings-view__card" aria-label="外观主题">
             <h2 className="settings-view__card-heading">外观</h2>
             <p className="settings-view__card-desc">
-              选择应用的颜色模式。「跟随系统」会根据你的系统设置自动切换深浅色。
+              选择应用的颜色模式。特殊主题通过追番成就解锁。
             </p>
             <div className="settings-view__theme-options" role="radiogroup" aria-label="主题选择">
               <button
@@ -320,8 +320,7 @@ export function SettingsView(): JSX.Element {
                 className={`settings-view__theme-button${theme === 'light' ? ' settings-view__theme-button--active' : ''}`}
                 onClick={() => handleThemeChange('light')}
               >
-                <span className="settings-view__theme-icon" aria-hidden="true">☀️</span>
-                <span>浅色</span>
+                浅色
               </button>
               <button
                 type="button"
@@ -330,8 +329,7 @@ export function SettingsView(): JSX.Element {
                 className={`settings-view__theme-button${theme === 'dark' ? ' settings-view__theme-button--active' : ''}`}
                 onClick={() => handleThemeChange('dark')}
               >
-                <span className="settings-view__theme-icon" aria-hidden="true">🌙</span>
-                <span>深色</span>
+                深色
               </button>
               <button
                 type="button"
@@ -340,19 +338,10 @@ export function SettingsView(): JSX.Element {
                 className={`settings-view__theme-button${theme === 'auto' ? ' settings-view__theme-button--active' : ''}`}
                 onClick={() => handleThemeChange('auto')}
               >
-                <span className="settings-view__theme-icon" aria-hidden="true">💻</span>
-                <span>跟随系统</span>
+                跟随系统
               </button>
-            </div>
-
-            {/* 特殊主题 */}
-            <p className="settings-view__card-desc" style={{ marginTop: '8px' }}>
-              特殊主题 — 通过追番成就解锁
-            </p>
-            <div className="settings-view__theme-options" role="radiogroup" aria-label="特殊主题">
               {SPECIAL_THEMES.map((t) => {
                 const isUnlocked = unlockedThemes.includes(t);
-                const icons: Record<string, string> = { pink: '🌸', blue: '🌊', gold: '✨' };
                 const labels: Record<string, string> = { pink: '樱花', blue: '海蓝', gold: '金色' };
                 return (
                   <button
@@ -369,15 +358,7 @@ export function SettingsView(): JSX.Element {
                     disabled={!isUnlocked}
                     title={isUnlocked ? labels[t] : `🔒 ${THEME_UNLOCK_CONDITIONS[t]}`}
                   >
-                    <span className="settings-view__theme-icon" aria-hidden="true">
-                      {isUnlocked ? icons[t] : '🔒'}
-                    </span>
-                    <span>{isUnlocked ? labels[t] : '???'}</span>
-                    {!isUnlocked && (
-                      <span className="settings-view__theme-hint">
-                        {THEME_UNLOCK_CONDITIONS[t]}
-                      </span>
-                    )}
+                    {isUnlocked ? labels[t] : '???'}
                   </button>
                 );
               })}
