@@ -34,7 +34,7 @@ import { readTextFile, writeTextFile } from '@tauri-apps/plugin-fs';
 
 import { useAnimeStore } from '../store/useAnimeStore';
 import { importFromBangumi, BangumiError } from '../lib/bangumi';
-import { applyTheme, getStoredTheme, setStoredTheme, getUnlockedThemes, checkAndUnlockThemes, THEME_UNLOCK_CONDITIONS, SPECIAL_THEMES } from '../lib/theme';
+import { applyTheme, getStoredTheme, setStoredTheme, getUnlockedThemes, checkAndUnlockThemes, unlockPinkTheme, THEME_UNLOCK_CONDITIONS, SPECIAL_THEMES } from '../lib/theme';
 import type { ThemeMode } from '../lib/theme';
 
 import './SettingsView.css';
@@ -162,6 +162,10 @@ export function SettingsView(): JSX.Element {
         kind: 'success',
         text: `成功导入 ${added} 部番剧（跳过 ${imported.length - added} 部已存在的）`,
       });
+      // 解锁粉色主题
+      if (unlockPinkTheme()) {
+        setUnlockedThemes(getUnlockedThemes());
+      }
     } catch (err) {
       if (err instanceof BangumiError && err.status === 404) {
         setBangumiStatus({ kind: 'error', text: '用户不存在，请检查用户名' });
@@ -521,6 +525,57 @@ export function SettingsView(): JSX.Element {
                 {clearStatus.text}
               </p>
             )}
+          </section>
+
+          {/* —— 关于 / Credits —— */}
+          <section className="settings-view__card" aria-label="关于">
+            <h2 className="settings-view__card-heading">关于 Pochan</h2>
+            <div className="settings-view__credits">
+              <p className="settings-view__credits-version">v0.1.0</p>
+              <p className="settings-view__credits-desc">
+                一个本地优先的追番气泡工具。
+              </p>
+              <div className="settings-view__credits-list">
+                <div className="settings-view__credits-item">
+                  <span className="settings-view__credits-role">开发</span>
+                  <span className="settings-view__credits-name">Lavr0v0</span>
+                </div>
+                <div className="settings-view__credits-item">
+                  <span className="settings-view__credits-role">框架</span>
+                  <span className="settings-view__credits-name">Tauri + React + TypeScript</span>
+                </div>
+                <div className="settings-view__credits-item">
+                  <span className="settings-view__credits-role">物理引擎</span>
+                  <span className="settings-view__credits-name">Matter.js</span>
+                </div>
+                <div className="settings-view__credits-item">
+                  <span className="settings-view__credits-role">数据源</span>
+                  <a
+                    className="settings-view__credits-link"
+                    href="https://bgm.tv"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Bangumi 番组计划
+                  </a>
+                </div>
+                <div className="settings-view__credits-item">
+                  <span className="settings-view__credits-role">源码</span>
+                  <a
+                    className="settings-view__credits-link"
+                    href="https://github.com/Lavr0v0/Pochan"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    GitHub
+                  </a>
+                </div>
+                <div className="settings-view__credits-item">
+                  <span className="settings-view__credits-role">许可证</span>
+                  <span className="settings-view__credits-name">MIT</span>
+                </div>
+              </div>
+            </div>
           </section>
         </div>
       </div>

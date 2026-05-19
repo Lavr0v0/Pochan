@@ -296,3 +296,60 @@
   color: var(--color-text-soft);
   font-weight: 400;
 }
+
+/* ---------------------------------------------------------------------------
+ * Credits
+ * ------------------------------------------------------------------------- */
+
+.settings-view__credits {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.settings-view__credits-version {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--color-text-soft);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.settings-view__credits-desc {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--color-text-soft);
+}
+
+.settings-view__credits-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.settings-view__credits-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.85rem;
+}
+
+.settings-view__credits-role {
+  color: var(--color-text-soft);
+  min-width: 60px;
+  flex-shrink: 0;
+}
+
+.settings-view__credits-name {
+  color: var(--color-text);
+}
+
+.settings-view__credits-link {
+  color: var(--color-text);
+  text-decoration: none;
+  border-bottom: 1px solid var(--color-border-strong);
+  transition: border-color 150ms ease;
+}
+
+.settings-view__credits-link:hover {
+  border-color: var(--color-text);
+}

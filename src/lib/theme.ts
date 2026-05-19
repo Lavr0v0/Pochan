@@ -14,9 +14,9 @@ export const SPECIAL_THEMES: ThemeMode[] = ['pink', 'blue', 'gold'];
 
 /** 特殊主题的解锁条件描述 */
 export const THEME_UNLOCK_CONDITIONS: Record<string, string> = {
-  pink: '追完 5 部番剧',
-  blue: '累计观看 100 集',
-  gold: '追完 20 部番剧',
+  pink: '从 Bangumi 导入收藏',
+  blue: '追完 5 部番剧',
+  gold: '???',
 };
 
 const STORAGE_KEY = 'pochan-theme';
@@ -87,27 +87,25 @@ export function unlockTheme(theme: ThemeMode): void {
 }
 
 /** 检查并解锁满足条件的主题，返回新解锁的主题列表 */
-export function checkAndUnlockThemes(completedCount: number, totalWatchedEpisodes: number): ThemeMode[] {
+export function checkAndUnlockThemes(completedCount: number, _totalWatchedEpisodes: number): ThemeMode[] {
   const newlyUnlocked: ThemeMode[] = [];
   const current = getUnlockedThemes();
 
-  // 粉色：追完 5 部
-  if (!current.includes('pink') && completedCount >= 5) {
-    unlockTheme('pink');
-    newlyUnlocked.push('pink');
-  }
-
-  // 蓝色：累计观看 100 集
-  if (!current.includes('blue') && totalWatchedEpisodes >= 100) {
+  // 蓝色：追完 5 部
+  if (!current.includes('blue') && completedCount >= 5) {
     unlockTheme('blue');
     newlyUnlocked.push('blue');
   }
 
-  // 金色：追完 20 部
-  if (!current.includes('gold') && completedCount >= 20) {
-    unlockTheme('gold');
-    newlyUnlocked.push('gold');
-  }
+  // 金色：暂不可解锁（未来开放）
 
   return newlyUnlocked;
+}
+
+/** 手动解锁粉色主题（从 Bangumi 导入时调用） */
+export function unlockPinkTheme(): boolean {
+  const current = getUnlockedThemes();
+  if (current.includes('pink')) return false;
+  unlockTheme('pink');
+  return true;
 }
