@@ -68,16 +68,14 @@ export function computeStaleness(now: number, lastWatchedAtIso: string): number 
 /**
  * 基于频率计算 staleness（位置）。
  *
- * 公式：
- *   - 时间窗口 = min(14, 距添加的天数)，下限 1 天避免除零
- *   - 频率 = watchedEpisodes / 时间窗口（集/天）
- *   - staleness = 1 - clamp(频率 / 3, 0, 1)
+ * 位置语义：
+ *   - 顶部（staleness=0）：10 集/天
+ *   - 正中间（staleness=0.5）：1 集/天
+ *   - 底部（staleness=1）：0 集/14 天（完全不看）
  *
- * 语义：
- *   - 一天看 3 集（或更多）→ staleness=0 → 顶部
- *   - 完全不看（频率=0）→ staleness=1 → 底部
- *   - 刚添加（0 集 / ~0 天）→ 频率=0 → 底部（符合预期）
- *   - 三天前加了，看了 3 集 → 频率=1 → staleness=0.67
+ * 使用对数映射让中间区域有更好的分辨率：
+ *   staleness = 1 - log(frequency + 1) / log(11)
+ *   其中 frequency = watchedEpisodes / windowDays
  */
 export function computeFrequencyStaleness(
   now: number,
@@ -89,11 +87,24 @@ export function computeFrequencyStaleness(
     return 1; // 没看过 → 底部
   }
   const daysSinceAdded = (now - addedAt) / MS_PER_DAY;
-  // 窗口：下限 1 天（避免除零和刚加就跳到顶部），上限 14 天
-  const windowDays = clamp(daysSinceAdded, 1, STALENESS_WINDOW_DAYS);
+  // 窗口：下限 0.5 天（避免除零），上限 14 天
+  const windowDays = clamp(daysSinceAdded, 0.5, STALENESS_WINDOW_DAYS);
   const frequency = watchedEpisodes / windowDays; // 集/天
-  // 频率 3 集/天 = 顶部（staleness 0），0 集/天 = 底部（staleness 1）
-  return clamp(1 - frequency / 3, 0, 1);
+
+  // log 映射：frequency=10 → staleness≈0, frequency=1 → staleness≈0.5, frequency=0 → staleness=1
+  // log(10+1)/log(11) = 1 → staleness = 0
+  // log(1+1)/log(11) ≈ 0.29 → staleness ≈ 0.71... 不太对
+  // 用更直接的公式：staleness = 1 - clamp(log2(frequency + 1) / log2(11), 0, 1)
+  // log2(11) ≈ 3.459
+  // frequency=10: log2(11)/log2(11) = 1 → staleness = 0 ✓
+  // frequency=1: log2(2)/log2(11) ≈ 0.289 → staleness ≈ 0.71... 还是不对
+
+  // 换个思路：用幂函数。设 staleness = 1 - (frequency / 10)^p
+  // 要求 frequency=1 时 staleness=0.5 → 0.5 = 1 - (1/10)^p → (0.1)^p = 0.5
+  // p = log(0.5) / log(0.1) ≈ 0.301
+  const p = 0.301;
+  const normalized = clamp(frequency / 10, 0, 1);
+  return clamp(1 - Math.pow(normalized, p), 0, 1);
 }
 
 /**

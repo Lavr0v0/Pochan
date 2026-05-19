@@ -34,7 +34,7 @@ import { readTextFile, writeTextFile } from '@tauri-apps/plugin-fs';
 
 import { useAnimeStore } from '../store/useAnimeStore';
 import { importFromBangumi, BangumiError } from '../lib/bangumi';
-import { applyTheme, getStoredTheme, setStoredTheme, getUnlockedThemes, checkAndUnlockThemes, unlockPinkTheme, THEME_UNLOCK_CONDITIONS, SPECIAL_THEMES } from '../lib/theme';
+import { applyTheme, getStoredTheme, setStoredTheme, getUnlockedThemes, checkAndUnlockThemes, unlockPinkTheme, redeemGoldTheme, THEME_UNLOCK_CONDITIONS, SPECIAL_THEMES } from '../lib/theme';
 import type { ThemeMode } from '../lib/theme';
 
 import './SettingsView.css';
@@ -104,6 +104,8 @@ export function SettingsView(): JSX.Element {
   // —— 主题切换 ——
   const [theme, setTheme] = useState<ThemeMode>(() => getStoredTheme());
   const [unlockedThemes, setUnlockedThemes] = useState<ThemeMode[]>(() => getUnlockedThemes());
+  const [redeemCode, setRedeemCode] = useState('');
+  const [redeemStatus, setRedeemStatus] = useState<string | null>(null);
 
   // 检查解锁条件
   const completedCount = animes.filter((a) => (a.watchStatus ?? 'watching') === 'completed').length;
@@ -121,6 +123,18 @@ export function SettingsView(): JSX.Element {
     setStoredTheme(mode);
     applyTheme(mode);
   }, []);
+
+  const handleRedeem = useCallback(() => {
+    if (redeemGoldTheme(redeemCode)) {
+      setUnlockedThemes(getUnlockedThemes());
+      setRedeemStatus('解锁成功！');
+      setRedeemCode('');
+    } else if (redeemCode.trim().length === 0) {
+      setRedeemStatus(null);
+    } else {
+      setRedeemStatus('兑换码无效');
+    }
+  }, [redeemCode]);
 
   const addAnime = useAnimeStore((s) => s.addAnime);
   const animeCount = animes.length;
@@ -350,6 +364,31 @@ export function SettingsView(): JSX.Element {
                 );
               })}
             </div>
+            {!unlockedThemes.includes('gold') && (
+              <div className="settings-view__actions" style={{ marginTop: '8px' }}>
+                <input
+                  type="text"
+                  className="settings-view__input"
+                  placeholder="兑换码"
+                  value={redeemCode}
+                  onChange={(e) => { setRedeemCode(e.target.value); setRedeemStatus(null); }}
+                  style={{ width: '120px' }}
+                />
+                <button
+                  type="button"
+                  className="settings-view__button"
+                  onClick={handleRedeem}
+                  disabled={redeemCode.trim().length === 0}
+                >
+                  兑换
+                </button>
+                {redeemStatus && (
+                  <span style={{ fontSize: '0.78rem', color: redeemStatus === '解锁成功！' ? 'var(--color-success)' : 'var(--color-danger)' }}>
+                    {redeemStatus}
+                  </span>
+                )}
+              </div>
+            )}
           </section>
 
           {/* —— Bangumi —— */}

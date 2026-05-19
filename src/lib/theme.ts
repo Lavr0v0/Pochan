@@ -16,7 +16,7 @@ export const SPECIAL_THEMES: ThemeMode[] = ['pink', 'blue', 'gold'];
 export const THEME_UNLOCK_CONDITIONS: Record<string, string> = {
   pink: '从 Bangumi 导入收藏',
   blue: '追完 5 部番剧',
-  gold: '???',
+  gold: '输入兑换码',
 };
 
 const STORAGE_KEY = 'pochan-theme';
@@ -111,5 +111,14 @@ export function unlockPinkTheme(): boolean {
   const current = getUnlockedThemes();
   if (current.includes('pink')) return false;
   unlockTheme('pink');
+  return true;
+}
+
+/** 通过兑换码解锁金色主题 */
+export function redeemGoldTheme(code: string): boolean {
+  if (code.trim() !== '131313') return false;
+  const current = getUnlockedThemes();
+  if (current.includes('gold')) return false;
+  unlockTheme('gold');
   return true;
 }
