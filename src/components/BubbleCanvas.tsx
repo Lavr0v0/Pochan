@@ -36,8 +36,10 @@ import './BubbleCanvas.css';
 // ---------------------------------------------------------------------------
 
 export interface BubbleCanvasProps {
-  /** 当前要展示的番剧列表（唯一数据源；通常来自 useAnimeStore） */
+  /** 当前要展示的番剧列表 */
   animes: TrackedAnime[];
+  /** 正在播放完成动画的 anime id */
+  completingId?: number | null;
   /**
    * 单击回调。
    *
@@ -535,6 +537,7 @@ export function BubbleCanvas(props: BubbleCanvasProps): JSX.Element {
             opacity={opacity}
             bgColor={bg}
             textColor={text}
+            isCompleting={props.completingId === anime.id}
             onClick={handleBubbleClick}
             onDoubleClick={handleBubbleDoubleClick}
             onContextMenu={handleBubbleContextMenu}

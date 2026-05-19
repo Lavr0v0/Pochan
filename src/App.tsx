@@ -44,6 +44,7 @@ function App(): JSX.Element {
   const [panelTab, setPanelTab] = useState<PanelTab>('library');
   const [mobileTab, setMobileTab] = useState<MobileTab>('bubble');
   const [addOpen, setAddOpen] = useState(false);
+  const [completingId, setCompletingId] = useState<number | null>(null);
   const isMobile = useIsMobile();
   const isLoaded = useAnimeStore((s) => s.isLoaded);
   const loadFromDisk = useAnimeStore((s) => s.loadFromDisk);
@@ -85,10 +86,14 @@ function App(): JSX.Element {
     if (anime.totalEpisodes > 0 && anime.watchedEpisodes >= anime.totalEpisodes) return;
     incrementWatched(animeId);
 
-    // 看完最后一集 → 完成动画 + 改状态 + 震窗口
+    // 看完最后一集 → 触发完成动画 → 延迟改状态
     if (anime.totalEpisodes > 0 && anime.watchedEpisodes + 1 >= anime.totalEpisodes) {
-      setTimeout(() => updateAnime(animeId, { watchStatus: 'completed' }), 1400);
+      setCompletingId(animeId);
       void shakeWindow();
+      setTimeout(() => {
+        updateAnime(animeId, { watchStatus: 'completed' });
+        setCompletingId(null);
+      }, 1400);
     }
   };
 
@@ -192,6 +197,7 @@ function App(): JSX.Element {
       <div className={`app__canvas${isMobile && mobileTab !== 'bubble' ? ' app__canvas--hidden' : ''}`}>
         <BubbleCanvas
           animes={watchingAnimes}
+          completingId={completingId}
           onBubbleClick={handleBubbleClick}
           onBubbleDoubleClick={handleBubbleDoubleClick}
           onBubbleContextMenu={handleBubbleContextMenu}

@@ -46,8 +46,8 @@
   width: 32px;
   height: 32px;
   border-radius: var(--radius-sm);
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  background-color: white;
+  border: 1px solid var(--color-border-strong);
+  background-color: var(--color-bg-surface);
   color: var(--color-text);
   font-family: inherit;
   font-size: 1rem;
@@ -75,8 +75,8 @@
 .calendar-view__today-button {
   padding: 6px 14px;
   border-radius: var(--radius-sm);
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  background-color: white;
+  border: 1px solid var(--color-border-strong);
+  background-color: var(--color-bg-surface);
   color: var(--color-text);
   font-family: inherit;
   font-size: 0.85rem;
@@ -124,8 +124,8 @@
   flex-direction: column;
   gap: 4px;
   padding: 6px;
-  background-color: white;
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   font-size: 0.8rem;
   color: var(--color-text);
@@ -230,9 +230,9 @@
   gap: 6px;
   width: 100%;
   padding: 4px;
-  border: 1px solid rgba(0, 0, 0, 0.06);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
-  background-color: white;
+  background-color: var(--color-bg-surface);
   text-align: left;
   cursor: pointer;
   font-family: inherit;
@@ -408,8 +408,8 @@
 .calendar-view__quick-cancel {
   padding: 6px 14px;
   border-radius: var(--radius-sm);
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  background-color: white;
+  border: 1px solid var(--color-border-strong);
+  background-color: var(--color-bg-surface);
   color: var(--color-text);
   font-family: inherit;
   font-size: 0.875rem;

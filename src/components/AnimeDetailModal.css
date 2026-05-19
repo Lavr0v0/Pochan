@@ -185,8 +185,8 @@
   width: 32px;
   height: 32px;
   border-radius: var(--radius-sm);
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  background-color: white;
+  border: 1px solid var(--color-border-strong);
+  background-color: var(--color-bg-surface);
   color: var(--color-text);
   font-family: inherit;
   font-size: 1.1rem;
@@ -211,8 +211,8 @@
   width: 80px;
   padding: 6px 10px;
   border-radius: var(--radius-sm);
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  background-color: white;
+  border: 1px solid var(--color-border-strong);
+  background-color: var(--color-bg-surface);
   color: var(--color-text);
   font-family: inherit;
   font-size: 0.9rem;
@@ -238,8 +238,8 @@
   min-height: 72px;
   padding: 8px 10px;
   border-radius: var(--radius-sm);
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  background-color: white;
+  border: 1px solid var(--color-border-strong);
+  background-color: var(--color-bg-surface);
   color: var(--color-text);
   font-family: inherit;
   font-size: 0.9rem;
@@ -304,18 +304,18 @@
 .anime-detail-modal__picker-label input[type='color'] {
   width: 32px;
   height: 32px;
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--color-border-strong);
   border-radius: var(--radius-sm);
   padding: 0;
-  background-color: white;
+  background-color: var(--color-bg-surface);
   cursor: pointer;
 }
 
 .anime-detail-modal__reset-color {
   padding: 6px 12px;
   border-radius: var(--radius-sm);
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  background-color: white;
+  border: 1px solid var(--color-border-strong);
+  background-color: var(--color-bg-surface);
   color: var(--color-text);
   font-family: inherit;
   font-size: 0.85rem;
@@ -348,8 +348,8 @@
 .anime-detail-modal__close-button {
   padding: 6px 14px;
   border-radius: var(--radius-sm);
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  background-color: white;
+  border: 1px solid var(--color-border-strong);
+  background-color: var(--color-bg-surface);
   color: var(--color-text);
   font-family: inherit;
   font-size: 0.9rem;

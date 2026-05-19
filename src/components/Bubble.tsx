@@ -22,6 +22,7 @@ export interface BubbleProps {
   opacity: number;
   bgColor: string;
   textColor: string;
+  isCompleting?: boolean;
   onClick?: (animeId: number) => void;
   onDoubleClick?: (animeId: number) => void;
   onContextMenu?: (animeId: number, x: number, y: number) => void;
@@ -44,6 +45,7 @@ const BubbleImpl = forwardRef<HTMLDivElement, BubbleProps>(function Bubble(props
     opacity,
     bgColor,
     textColor,
+    isCompleting,
     onClick,
     onDoubleClick,
     onContextMenu,
@@ -140,7 +142,7 @@ const BubbleImpl = forwardRef<HTMLDivElement, BubbleProps>(function Bubble(props
   return (
     <div
       ref={ref}
-      className="bubble"
+      className={`bubble${isCompleting ? ' bubble--completed' : ''}`}
       style={styleVars}
       role="button"
       tabIndex={0}
