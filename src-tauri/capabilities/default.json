@@ -21,6 +21,10 @@
         { "url": "https://api.bgm.tv/**" },
         { "url": "https://lain.bgm.tv/**" }
       ]
-    }
+    },
+    "notification:default",
+    "notification:allow-is-permission-granted",
+    "notification:allow-request-permission",
+    "notification:allow-notify"
   ]
 }

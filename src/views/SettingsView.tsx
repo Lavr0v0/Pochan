@@ -331,15 +331,6 @@ export function SettingsView(): JSX.Element {
               >
                 深色
               </button>
-              <button
-                type="button"
-                role="radio"
-                aria-checked={theme === 'auto'}
-                className={`settings-view__theme-button${theme === 'auto' ? ' settings-view__theme-button--active' : ''}`}
-                onClick={() => handleThemeChange('auto')}
-              >
-                跟随系统
-              </button>
               {SPECIAL_THEMES.map((t) => {
                 const isUnlocked = unlockedThemes.includes(t);
                 const labels: Record<string, string> = { pink: '樱花', blue: '海蓝', gold: '金色' };

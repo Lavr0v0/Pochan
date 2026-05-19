@@ -14,6 +14,7 @@ import { Toast } from './components/Toast';
 import { LibraryView } from './views/LibraryView';
 import { CalendarView } from './views/CalendarView';
 import { SettingsView } from './views/SettingsView';
+import { checkAndNotifyTodayAiring } from './lib/notification';
 import type { TrackedAnime } from './types';
 
 import './App.css';
@@ -53,6 +54,13 @@ function App(): JSX.Element {
   useEffect(() => {
     void loadFromDisk();
   }, [loadFromDisk]);
+
+  // 数据加载完成后检查今日更新通知
+  useEffect(() => {
+    if (isLoaded && animes.length > 0) {
+      void checkAndNotifyTodayAiring(animes);
+    }
+  }, [isLoaded]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /** 移动端切换 tab 时同步 panelTab */
   const handleMobileTabChange = useCallback((tab: MobileTab) => {

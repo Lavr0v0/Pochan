@@ -7,7 +7,7 @@
  * 用户选择持久化到 localStorage。
  */
 
-export type ThemeMode = 'light' | 'dark' | 'auto' | 'pink' | 'blue' | 'gold';
+export type ThemeMode = 'light' | 'dark' | 'pink' | 'blue' | 'gold';
 
 /** 需要解锁的特殊主题 */
 export const SPECIAL_THEMES: ThemeMode[] = ['pink', 'blue', 'gold'];
@@ -30,11 +30,11 @@ export function getStoredTheme(): ThemeMode {
   } catch {
     // localStorage 不可用时回退
   }
-  return 'auto';
+  return 'light';
 }
 
 function isValidTheme(value: string | null): value is ThemeMode {
-  return value === 'light' || value === 'dark' || value === 'auto' ||
+  return value === 'light' || value === 'dark' ||
     value === 'pink' || value === 'blue' || value === 'gold';
 }
 
