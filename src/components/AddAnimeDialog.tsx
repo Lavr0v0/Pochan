@@ -731,9 +731,9 @@ function ConfigureStage(props: ConfigureStageProps): JSX.Element {
 
       {/* 自动检测的类型信息（只读展示） */}
       <div className="add-anime-dialog__field">
-        <span className="add-anime-dialog__label">类型（自动检测）</span>
+        <span className="add-anime-dialog__label">状态（自动检测）</span>
         <span style={{ fontSize: '0.9rem', color: 'var(--color-text)' }}>
-          {form.status === 'airing' ? '📺 新番' : '📀 老番'}
+          {form.status === 'airing' ? '连载中' : form.status === 'upcoming' ? '未开播' : '完结'}
           {form.status === 'airing' && form.airDay !== undefined && (
             <span style={{ marginLeft: 12, color: 'var(--color-text-soft)' }}>
               每{AIR_DAY_LABELS[form.airDay]}更新

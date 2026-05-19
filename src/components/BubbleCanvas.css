@@ -1,12 +1,8 @@
 /**
  * BubbleCanvas 容器样式
  *
- * 实现 design.md "UI / Visual Design / 气泡画布背景"：米色底 +
- * 三层低透明度径向渐变光晕（橙、紫、青），形成温暖、柔和的视觉。
- *
- * - position: relative + overflow: hidden：让所有子气泡 absolute 定位，
- *   并裁剪偶尔越出墙体的视觉外溢。
- * - touch-action: none：避免触屏滚动手势与气泡拖拽冲突。
+ * 米色底 + 三层低透明度径向渐变光晕（橙、紫、青），形成温暖、柔和的视觉。
+ * 深色模式下使用深色背景 + 更暗的光晕。
  */
 
 .bubble-canvas {
@@ -16,9 +12,17 @@
   overflow: hidden;
   touch-action: none;
 
-  background-color: #FAF7F2;
+  background-color: var(--color-bg);
   background-image:
     radial-gradient(circle at 20% 30%, rgba(245, 196, 179, 0.18), transparent 40%),
     radial-gradient(circle at 80% 70%, rgba(206, 203, 246, 0.18), transparent 40%),
     radial-gradient(circle at 50% 50%, rgba(159, 225, 203, 0.12), transparent 50%);
+}
+
+/* 深色模式 */
+html[data-theme="dark"] .bubble-canvas {
+  background-image:
+    radial-gradient(circle at 20% 30%, rgba(180, 100, 80, 0.1), transparent 40%),
+    radial-gradient(circle at 80% 70%, rgba(100, 90, 180, 0.1), transparent 40%),
+    radial-gradient(circle at 50% 50%, rgba(60, 150, 120, 0.08), transparent 50%);
 }
