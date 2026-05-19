@@ -46,6 +46,36 @@ html[data-theme="dark"] {
   }
 }
 
+/* 粉色主题 */
+html[data-theme="pink"] {
+  --color-bg: #FFF0F3;
+  --color-bg-soft: #FFE0E6;
+  --color-text: #4A1942;
+  --color-text-soft: #8B5E83;
+  --color-border: rgba(219, 112, 147, 0.15);
+  --color-border-strong: rgba(219, 112, 147, 0.3);
+}
+
+/* 蓝色主题 */
+html[data-theme="blue"] {
+  --color-bg: #F0F4FF;
+  --color-bg-soft: #E0EAFF;
+  --color-text: #1A2744;
+  --color-text-soft: #5B6E8A;
+  --color-border: rgba(66, 133, 244, 0.12);
+  --color-border-strong: rgba(66, 133, 244, 0.25);
+}
+
+/* 金色主题 */
+html[data-theme="gold"] {
+  --color-bg: #FFFDF5;
+  --color-bg-soft: #FFF8E1;
+  --color-text: #3D2E00;
+  --color-text-soft: #7A6B3A;
+  --color-border: rgba(184, 134, 11, 0.12);
+  --color-border-strong: rgba(184, 134, 11, 0.25);
+}
+
 /* 基础重置 */
 * {
   box-sizing: border-box;

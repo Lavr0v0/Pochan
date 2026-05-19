@@ -279,3 +279,20 @@
   font-size: 1.4rem;
   line-height: 1;
 }
+
+.settings-view__theme-button--locked {
+  opacity: 0.5;
+  cursor: not-allowed;
+  border-style: dashed;
+}
+
+.settings-view__theme-button--locked:hover {
+  border-color: var(--color-border);
+  color: var(--color-text-soft);
+}
+
+.settings-view__theme-hint {
+  font-size: 0.65rem;
+  color: var(--color-text-soft);
+  font-weight: 400;
+}

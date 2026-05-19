@@ -27,14 +27,14 @@
  * Validates: Requirements 10.1, 10.2, 10.3, 10.4, 10.5, 10.6, 10.7
  */
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { open, save } from '@tauri-apps/plugin-dialog';
 import { readTextFile, writeTextFile } from '@tauri-apps/plugin-fs';
 
 import { useAnimeStore } from '../store/useAnimeStore';
 import { importFromBangumi, BangumiError } from '../lib/bangumi';
-import { applyTheme, getStoredTheme, setStoredTheme } from '../lib/theme';
+import { applyTheme, getStoredTheme, setStoredTheme, getUnlockedThemes, checkAndUnlockThemes, THEME_UNLOCK_CONDITIONS, SPECIAL_THEMES } from '../lib/theme';
 import type { ThemeMode } from '../lib/theme';
 
 import './SettingsView.css';
@@ -103,6 +103,18 @@ export function SettingsView(): JSX.Element {
 
   // —— 主题切换 ——
   const [theme, setTheme] = useState<ThemeMode>(() => getStoredTheme());
+  const [unlockedThemes, setUnlockedThemes] = useState<ThemeMode[]>(() => getUnlockedThemes());
+
+  // 检查解锁条件
+  const completedCount = animes.filter((a) => (a.watchStatus ?? 'watching') === 'completed').length;
+  const totalWatchedEpisodes = animes.reduce((sum, a) => sum + a.watchedEpisodes, 0);
+
+  useEffect(() => {
+    const newlyUnlocked = checkAndUnlockThemes(completedCount, totalWatchedEpisodes);
+    if (newlyUnlocked.length > 0) {
+      setUnlockedThemes(getUnlockedThemes());
+    }
+  }, [completedCount, totalWatchedEpisodes]);
 
   const handleThemeChange = useCallback((mode: ThemeMode) => {
     setTheme(mode);
@@ -327,6 +339,44 @@ export function SettingsView(): JSX.Element {
                 <span className="settings-view__theme-icon" aria-hidden="true">💻</span>
                 <span>跟随系统</span>
               </button>
+            </div>
+
+            {/* 特殊主题 */}
+            <p className="settings-view__card-desc" style={{ marginTop: '8px' }}>
+              特殊主题 — 通过追番成就解锁
+            </p>
+            <div className="settings-view__theme-options" role="radiogroup" aria-label="特殊主题">
+              {SPECIAL_THEMES.map((t) => {
+                const isUnlocked = unlockedThemes.includes(t);
+                const icons: Record<string, string> = { pink: '🌸', blue: '🌊', gold: '✨' };
+                const labels: Record<string, string> = { pink: '樱花', blue: '海蓝', gold: '金色' };
+                return (
+                  <button
+                    key={t}
+                    type="button"
+                    role="radio"
+                    aria-checked={theme === t}
+                    className={
+                      `settings-view__theme-button` +
+                      (theme === t ? ' settings-view__theme-button--active' : '') +
+                      (!isUnlocked ? ' settings-view__theme-button--locked' : '')
+                    }
+                    onClick={() => isUnlocked && handleThemeChange(t)}
+                    disabled={!isUnlocked}
+                    title={isUnlocked ? labels[t] : `🔒 ${THEME_UNLOCK_CONDITIONS[t]}`}
+                  >
+                    <span className="settings-view__theme-icon" aria-hidden="true">
+                      {isUnlocked ? icons[t] : '🔒'}
+                    </span>
+                    <span>{isUnlocked ? labels[t] : '???'}</span>
+                    {!isUnlocked && (
+                      <span className="settings-view__theme-hint">
+                        {THEME_UNLOCK_CONDITIONS[t]}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           </section>
 

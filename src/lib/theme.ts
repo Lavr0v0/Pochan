@@ -1,26 +1,41 @@
 /**
  * 主题管理
  *
- * 支持三种模式：light / dark / auto（跟随系统）
+ * 基础模式：light / dark / auto（跟随系统）
+ * 特殊主题：pink / blue / gold（通过成就解锁）
  * 通过 html[data-theme] 属性切换，CSS 变量自动响应。
  * 用户选择持久化到 localStorage。
  */
 
-export type ThemeMode = 'light' | 'dark' | 'auto';
+export type ThemeMode = 'light' | 'dark' | 'auto' | 'pink' | 'blue' | 'gold';
+
+/** 需要解锁的特殊主题 */
+export const SPECIAL_THEMES: ThemeMode[] = ['pink', 'blue', 'gold'];
+
+/** 特殊主题的解锁条件描述 */
+export const THEME_UNLOCK_CONDITIONS: Record<string, string> = {
+  pink: '追完 5 部番剧',
+  blue: '累计观看 100 集',
+  gold: '追完 20 部番剧',
+};
 
 const STORAGE_KEY = 'pochan-theme';
+const UNLOCKED_KEY = 'pochan-themes-unlocked';
 
 /** 读取用户保存的主题偏好，默认 auto */
 export function getStoredTheme(): ThemeMode {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored === 'light' || stored === 'dark' || stored === 'auto') {
-      return stored;
-    }
+    if (isValidTheme(stored)) return stored;
   } catch {
     // localStorage 不可用时回退
   }
   return 'auto';
+}
+
+function isValidTheme(value: string | null): value is ThemeMode {
+  return value === 'light' || value === 'dark' || value === 'auto' ||
+    value === 'pink' || value === 'blue' || value === 'gold';
 }
 
 /** 保存主题偏好 */
@@ -42,4 +57,57 @@ export function initTheme(): ThemeMode {
   const mode = getStoredTheme();
   applyTheme(mode);
   return mode;
+}
+
+/** 获取已解锁的特殊主题列表 */
+export function getUnlockedThemes(): ThemeMode[] {
+  try {
+    const stored = localStorage.getItem(UNLOCKED_KEY);
+    if (!stored) return [];
+    const parsed = JSON.parse(stored);
+    if (Array.isArray(parsed)) {
+      return parsed.filter((t: unknown) => SPECIAL_THEMES.includes(t as ThemeMode)) as ThemeMode[];
+    }
+  } catch {
+    // 静默
+  }
+  return [];
+}
+
+/** 解锁一个特殊主题 */
+export function unlockTheme(theme: ThemeMode): void {
+  const current = getUnlockedThemes();
+  if (current.includes(theme)) return;
+  current.push(theme);
+  try {
+    localStorage.setItem(UNLOCKED_KEY, JSON.stringify(current));
+  } catch {
+    // 静默
+  }
+}
+
+/** 检查并解锁满足条件的主题，返回新解锁的主题列表 */
+export function checkAndUnlockThemes(completedCount: number, totalWatchedEpisodes: number): ThemeMode[] {
+  const newlyUnlocked: ThemeMode[] = [];
+  const current = getUnlockedThemes();
+
+  // 粉色：追完 5 部
+  if (!current.includes('pink') && completedCount >= 5) {
+    unlockTheme('pink');
+    newlyUnlocked.push('pink');
+  }
+
+  // 蓝色：累计观看 100 集
+  if (!current.includes('blue') && totalWatchedEpisodes >= 100) {
+    unlockTheme('blue');
+    newlyUnlocked.push('blue');
+  }
+
+  // 金色：追完 20 部
+  if (!current.includes('gold') && completedCount >= 20) {
+    unlockTheme('gold');
+    newlyUnlocked.push('gold');
+  }
+
+  return newlyUnlocked;
 }
