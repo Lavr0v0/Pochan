@@ -99,10 +99,11 @@ export function computeFrequencyStaleness(
   // frequency=10: log2(11)/log2(11) = 1 → staleness = 0 ✓
   // frequency=1: log2(2)/log2(11) ≈ 0.289 → staleness ≈ 0.71... 还是不对
 
-  // 换个思路：用幂函数。设 staleness = 1 - (frequency / 10)^p
-  // 要求 frequency=1 时 staleness=0.5 → 0.5 = 1 - (1/10)^p → (0.1)^p = 0.5
-  // p = log(0.5) / log(0.1) ≈ 0.301
-  const p = 0.301;
+  // 要求 frequency=1 时 staleness=0.6（五分之三处，即从顶部算五分之二处偏下）
+  // staleness = 1 - (frequency / 10)^p
+  // 0.6 = 1 - (1/10)^p → (0.1)^p = 0.4
+  // p = log(0.4) / log(0.1) ≈ 0.398
+  const p = 0.398;
   const normalized = clamp(frequency / 10, 0, 1);
   return clamp(1 - Math.pow(normalized, p), 0, 1);
 }

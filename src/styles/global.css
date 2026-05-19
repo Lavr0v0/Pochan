@@ -111,22 +111,26 @@ html[data-theme="blue"] {
   --color-accent-soft: rgba(46, 106, 184, 0.12);
 }
 
-/* Gold 金色主题 */
+/* Gold 黑金主题 */
 html[data-theme="gold"] {
-  --color-bg: #FDFBF5;
-  --color-bg-soft: #F9F4E8;
-  --color-bg-surface: #FFFFFF;
-  --color-bg-surface-hover: #FBF7EE;
+  --color-bg: #1A1810;
+  --color-bg-soft: #242014;
+  --color-bg-surface: #2C2818;
+  --color-bg-surface-hover: #36301E;
 
-  --color-text: #3D3420;
-  --color-text-soft: #7A6B4A;
-  --color-text-muted: #B0A080;
+  --color-text: #E8D8A0;
+  --color-text-soft: #B8A870;
+  --color-text-muted: #887840;
 
-  --color-border: rgba(160, 120, 30, 0.08);
-  --color-border-strong: rgba(160, 120, 30, 0.16);
+  --color-border: rgba(200, 170, 80, 0.12);
+  --color-border-strong: rgba(200, 170, 80, 0.22);
 
-  --color-accent: #A07820;
-  --color-accent-soft: rgba(160, 120, 32, 0.1);
+  --color-accent: #D4A830;
+  --color-accent-soft: rgba(212, 168, 48, 0.15);
+
+  --shadow-panel: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-popover: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-floating: 0 8px 24px rgba(0, 0, 0, 0.5);
 }
 
 /* 基础重置 */

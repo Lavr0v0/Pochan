@@ -184,6 +184,12 @@
   gap: 2px;
 }
 
+/* 气泡靠近顶部时 tooltip 显示在下方 */
+.bubble--near-top .bubble__tooltip {
+  bottom: auto;
+  top: calc(100% + 10px);
+}
+
 .bubble:hover .bubble__tooltip {
   opacity: 1;
 }

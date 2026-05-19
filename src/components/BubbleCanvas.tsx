@@ -356,6 +356,9 @@ export function BubbleCanvas(props: BubbleCanvasProps): JSX.Element {
         const ty = body.position.y - r;
         el.style.setProperty('--bubble-x', `${tx}px`);
         el.style.setProperty('--bubble-y', `${ty}px`);
+        // 靠近顶部时 tooltip 显示在下方
+        const nearTop = body.position.y < height * 0.2;
+        el.classList.toggle('bubble--near-top', nearTop);
       });
 
       rafRef.current = requestAnimationFrame(tick);
