@@ -190,36 +190,37 @@ export async function getAiredEpisodeCount(subjectId: number): Promise<number> {
  */
 export function inferStatus(subject: BangumiSubject): 'airing' | 'finished' | 'upcoming' {
   const today = new Date().toISOString().slice(0, 10);
-
-  // 有 air_date 且在未来 → 未播出
-  if (subject.air_date && subject.air_date > today) {
-    return 'upcoming';
-  }
+  const airDate = subject.air_date;
 
   // 没有开播日期 → 已完结（无法判断）
-  if (!subject.air_date) {
+  if (!airDate) {
     return 'finished';
   }
 
-  // 有 air_weekday 且总集数已知：检查是否已经播完
-  // 估算结束日期 = 开播日 + 总集数 * 7 天
-  if (Number.isInteger(subject.air_weekday) && subject.air_weekday >= 1 && subject.air_weekday <= 7) {
-    const totalEps = subject.total_episodes || subject.eps || 0;
-    if (totalEps > 0) {
-      const startDate = new Date(subject.air_date);
-      const estimatedEnd = new Date(startDate.getTime() + totalEps * 7 * 24 * 60 * 60 * 1000);
-      const now = new Date();
-      if (now < estimatedEnd) {
-        return 'airing';
-      }
-      // 已经超过预计结束日期 → 完结
+  // 开播日在未来 → 未播出
+  if (airDate > today) {
+    return 'upcoming';
+  }
+
+  // 已开播。判断是否已完结：
+  const totalEps = (subject.total_episodes ?? 0) || (subject.eps ?? 0) || 0;
+
+  if (totalEps > 0) {
+    // 有总集数：估算结束日 = 开播日 + 总集数 × 7天
+    const startMs = new Date(airDate).getTime();
+    const endMs = startMs + totalEps * 7 * 24 * 60 * 60 * 1000;
+    if (Date.now() >= endMs) {
       return 'finished';
     }
-    // 总集数未知但有 air_weekday → 可能是长篇连载（如海贼王）
     return 'airing';
   }
 
-  // 没有 air_weekday → 已完结
+  // 总集数未知：如果有 air_weekday 则视为连载中
+  const w = subject.air_weekday;
+  if (Number.isInteger(w) && w >= 1 && w <= 7) {
+    return 'airing';
+  }
+
   return 'finished';
 }
 
