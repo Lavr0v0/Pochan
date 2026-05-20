@@ -78,11 +78,11 @@ interface FilterOption {
 }
 
 const FILTER_OPTIONS: readonly FilterOption[] = [
-  { value: 'all', label: '全部' },
   { value: 'watching', label: '在看' },
   { value: 'plan', label: '想看' },
   { value: 'completed', label: '看完' },
   { value: 'dropped', label: '弃番' },
+  { value: 'all', label: '全部' },
 ] as const;
 
 /** 把 watchStatus 转成中文 label（显示用） */
@@ -217,7 +217,7 @@ export function LibraryView(): JSX.Element {
   const [layout, setLayout] = useState<LayoutMode>('card');
   const [sortKey, setSortKey] = useState<SortKey>('lastWatchedAt');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
-  const [filterStatus, setFilterStatus] = useState<FilterWatchStatus>('all');
+  const [filterStatus, setFilterStatus] = useState<FilterWatchStatus>('watching');
   const [selectedIds, setSelectedIds] = useState<Set<number>>(() => new Set());
   const [detailAnimeId, setDetailAnimeId] = useState<number | null>(null);
   const [confirmingDelete, setConfirmingDelete] = useState<boolean>(false);
