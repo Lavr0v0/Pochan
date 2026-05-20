@@ -78,6 +78,8 @@
 | Windows x64 | `Pochan_x.x.x_x64-setup.exe` |
 | Windows x86 | `Pochan_x.x.x_x86-setup.exe` |
 | Windows ARM64 | `Pochan_x.x.x_arm64-setup.exe` |
+
+> ⚠️ Windows 可能弹出 SmartScreen 警告，这是因为安装包未签名。点击「更多信息」→「仍要运行」即可正常安装。
 | macOS (Apple Silicon) | `Pochan_x.x.x_aarch64.dmg` |
 | macOS (Intel) | `Pochan_x.x.x_x64.dmg` |
 | Linux x64 | `pochan_x.x.x_amd64.deb` / `.AppImage` |
@@ -163,6 +165,8 @@ Go to [Releases](https://github.com/Lavr0v0/Pochan/releases) and download the in
 | macOS (Apple Silicon) | `Pochan_x.x.x_aarch64.dmg` |
 | macOS (Intel) | `Pochan_x.x.x_x64.dmg` |
 | Linux x64 | `pochan_x.x.x_amd64.deb` / `.AppImage` |
+
+> ⚠️ Windows may show a SmartScreen warning because the installer is unsigned. Click "More info" → "Run anyway" to proceed.
 
 ### Data Storage
 
