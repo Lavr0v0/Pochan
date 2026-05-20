@@ -85,7 +85,14 @@ function App(): JSX.Element {
   useEffect(() => {
     if (!isLoaded || animes.length === 0) return;
 
-    // 根据 airDate + totalEpisodes 重新计算每部番的放送状态
+    // 数据迁移：为没有 plannedEpisodes 的番补充该字段
+    for (const anime of animes) {
+      if (anime.plannedEpisodes === undefined && anime.totalEpisodes > 0) {
+        updateAnime(anime.id, { plannedEpisodes: anime.totalEpisodes });
+      }
+    }
+
+    // 根据 airDate + plannedEpisodes 重新计算每部番的放送状态
     const now = new Date();
     const todayStr = now.toISOString().slice(0, 10);
 

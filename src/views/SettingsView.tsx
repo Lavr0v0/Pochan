@@ -27,7 +27,7 @@
  * Validates: Requirements 10.1, 10.2, 10.3, 10.4, 10.5, 10.6, 10.7
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { open, save } from '@tauri-apps/plugin-dialog';
 import { readTextFile, writeTextFile } from '@tauri-apps/plugin-fs';
@@ -115,7 +115,11 @@ export function SettingsView(): JSX.Element {
   const completedCount = animes.filter((a) => (a.watchStatus ?? 'watching') === 'completed').length;
   const totalWatchedEpisodes = animes.reduce((sum, a) => sum + a.watchedEpisodes, 0);
 
+  // 重置个性化后禁止自动解锁（直到组件重新挂载）
+  const autoUnlockDisabledRef = useRef(false);
+
   useEffect(() => {
+    if (autoUnlockDisabledRef.current) return;
     const newlyUnlocked = checkAndUnlockThemes(completedCount, totalWatchedEpisodes);
     if (newlyUnlocked.length > 0) {
       setUnlockedThemes(getUnlockedThemes());
@@ -346,6 +350,10 @@ export function SettingsView(): JSX.Element {
         localStorage.removeItem('pochan-theme');
         localStorage.removeItem('pochan-themes-unlocked');
         localStorage.removeItem('pochan-tutorial-completed');
+        applyTheme('light');
+        setTheme('light');
+        autoUnlockDisabledRef.current = true;
+        setUnlockedThemes([]);
         setClearStatus({ kind: 'success', text: '已清空所有数据' });
         break;
       case 'preferences':
@@ -355,6 +363,7 @@ export function SettingsView(): JSX.Element {
         localStorage.removeItem('pochan-tutorial-completed');
         applyTheme('light');
         setTheme('light');
+        autoUnlockDisabledRef.current = true;
         setUnlockedThemes([]);
         setClearStatus({ kind: 'success', text: '已重置个性化设置' });
         break;
