@@ -294,3 +294,40 @@
     line-height: 1;
   }
 }
+
+/* 更新提示横幅 */
+.app__update-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 14px;
+  background-color: var(--color-accent-soft);
+  border-bottom: 1px solid var(--color-accent);
+  font-size: 0.78rem;
+  color: var(--color-text);
+}
+
+.app__update-btn {
+  padding: 3px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-accent);
+  background: var(--color-accent);
+  color: white;
+  font-family: inherit;
+  font-size: 0.72rem;
+  cursor: pointer;
+}
+
+.app__update-btn:hover {
+  opacity: 0.9;
+}
+
+.app__update-dismiss {
+  margin-left: auto;
+  border: none;
+  background: none;
+  color: var(--color-text-soft);
+  font-size: 1rem;
+  cursor: pointer;
+  line-height: 1;
+}

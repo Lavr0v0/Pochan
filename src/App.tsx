@@ -46,6 +46,7 @@ function App(): JSX.Element {
   const [mobileTab, setMobileTab] = useState<MobileTab>('bubble');
   const [addOpen, setAddOpen] = useState(false);
   const [completingId, setCompletingId] = useState<number | null>(null);
+  const [updateAvailable, setUpdateAvailable] = useState<string | null>(null);
   const isMobile = useIsMobile();
   const isLoaded = useAnimeStore((s) => s.isLoaded);
   const loadFromDisk = useAnimeStore((s) => s.loadFromDisk);
@@ -56,6 +57,14 @@ function App(): JSX.Element {
 
   useEffect(() => {
     void loadFromDisk();
+    // 启动时检查更新
+    import('./lib/updater').then(({ checkForUpdate }) => {
+      checkForUpdate().then((result) => {
+        if (result.available && result.version) {
+          setUpdateAvailable(result.version);
+        }
+      });
+    }).catch(() => {});
   }, [loadFromDisk]);
 
   // 数据加载完成后：刷新放送状态 + 检查今日更新通知
@@ -195,6 +204,28 @@ function App(): JSX.Element {
           </button>
         </div>
       </div>
+      {/* 更新提示 */}
+      {updateAvailable && (
+        <div className="app__update-banner">
+          <span>新版本 {updateAvailable} 可用</span>
+          <button
+            className="app__update-btn"
+            onClick={() => {
+              import('./lib/updater').then(({ installUpdate }) => {
+                void installUpdate();
+              });
+            }}
+          >
+            立即更新
+          </button>
+          <button
+            className="app__update-dismiss"
+            onClick={() => setUpdateAvailable(null)}
+          >
+            ×
+          </button>
+        </div>
+      )}
       {/* 主内容区 */}
       <div className="app__body">
       {/* 左侧面板（移动端：非 bubble tab 时显示） */}
