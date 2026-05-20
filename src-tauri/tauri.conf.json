@@ -1,6 +1,6 @@
 {
   "productName": "Pochan",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "identifier": "com.pochan.app",
   "build": {
     "beforeDevCommand": "npm run dev",
