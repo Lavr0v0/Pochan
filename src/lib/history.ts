@@ -70,15 +70,18 @@ export function getHistoryForAnime(animeId: number): WatchHistoryEntry[] {
   return getHistory().filter((e) => e.animeId === animeId);
 }
 
-/** 获取今天的观看集数 */
+/** 获取今天的净观看集数 */
 export function getTodayWatchCount(): number {
   const today = new Date().toISOString().slice(0, 10);
-  return getHistory().filter(
-    (e) => e.action === 'increment' && e.timestamp.startsWith(today)
-  ).length;
+  const todayEntries = getHistory().filter((e) => e.timestamp.startsWith(today));
+  let net = 0;
+  for (const e of todayEntries) {
+    net += e.action === 'increment' ? 1 : -1;
+  }
+  return Math.max(0, net);
 }
 
-/** 获取最近 N 天每天的观看集数 */
+/** 获取最近 N 天每天的净观看集数 */
 export function getDailyWatchCounts(days: number): { date: string; count: number }[] {
   const history = getHistory();
   const result: { date: string; count: number }[] = [];
@@ -88,10 +91,13 @@ export function getDailyWatchCounts(days: number): { date: string; count: number
     const d = new Date(now);
     d.setDate(d.getDate() - i);
     const dateStr = d.toISOString().slice(0, 10);
-    const count = history.filter(
-      (e) => e.action === 'increment' && e.timestamp.startsWith(dateStr)
-    ).length;
-    result.push({ date: dateStr, count });
+    let net = 0;
+    for (const e of history) {
+      if (e.timestamp.startsWith(dateStr)) {
+        net += e.action === 'increment' ? 1 : -1;
+      }
+    }
+    result.push({ date: dateStr, count: Math.max(0, net) });
   }
 
   return result;
@@ -105,30 +111,38 @@ export function getStats(_animeCount: number): {
   mostActiveDay: { date: string; count: number } | null;
   streak: number;
 } {
-  const history = getHistory().filter((e) => e.action === 'increment');
-  const totalEpisodesWatched = history.length;
+  const history = getHistory();
+  
+  // 净观看集数：increment - decrement
+  const increments = history.filter((e) => e.action === 'increment').length;
+  const decrements = history.filter((e) => e.action === 'decrement').length;
+  const totalEpisodesWatched = Math.max(0, increments - decrements);
 
-  // 活跃天数
-  const activeDays = new Set(history.map((e) => e.timestamp.slice(0, 10)));
+  // 活跃天数（只算净增为正的天）
+  const dayNet = new Map<string, number>();
+  for (const e of history) {
+    const day = e.timestamp.slice(0, 10);
+    const delta = e.action === 'increment' ? 1 : -1;
+    dayNet.set(day, (dayNet.get(day) ?? 0) + delta);
+  }
+  const activeDays = new Set<string>();
+  for (const [day, net] of dayNet) {
+    if (net > 0) activeDays.add(day);
+  }
   const totalDaysActive = activeDays.size;
 
   // 平均每天
   const averagePerDay = totalDaysActive > 0 ? totalEpisodesWatched / totalDaysActive : 0;
 
-  // 最活跃的一天
-  const dayCounts = new Map<string, number>();
-  for (const e of history) {
-    const day = e.timestamp.slice(0, 10);
-    dayCounts.set(day, (dayCounts.get(day) ?? 0) + 1);
-  }
+  // 最活跃的一天（净增最多）
   let mostActiveDay: { date: string; count: number } | null = null;
-  for (const [date, count] of dayCounts) {
-    if (!mostActiveDay || count > mostActiveDay.count) {
-      mostActiveDay = { date, count };
+  for (const [date, net] of dayNet) {
+    if (net > 0 && (!mostActiveDay || net > mostActiveDay.count)) {
+      mostActiveDay = { date, count: net };
     }
   }
 
-  // 连续观看天数（从今天往回数）
+  // 连续观看天数（从今天往回数，只算净增 > 0 的天）
   let streak = 0;
   const today = new Date();
   for (let i = 0; i < 365; i++) {
