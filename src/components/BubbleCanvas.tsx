@@ -335,7 +335,9 @@ export function BubbleCanvas(props: BubbleCanvasProps): JSX.Element {
         }
 
         const phase = (animeId * 1.7) % (Math.PI * 2);
-        const floatOffset = Math.sin((t / FLOAT_PERIOD_MS) * Math.PI * 2 + phase) * FLOAT_AMPLITUDE;
+        // staleness=1（沉底）时不浮动，越靠上浮动越明显
+        const floatScale = 1 - staleness;
+        const floatOffset = Math.sin((t / FLOAT_PERIOD_MS) * Math.PI * 2 + phase) * FLOAT_AMPLITUDE * floatScale;
         // 钳制最终位置，确保气泡不超出屏幕
         const targetY = Math.max(r, Math.min(height - r, currentAnchor + floatOffset));
 
