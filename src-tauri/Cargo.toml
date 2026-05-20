@@ -1,6 +1,6 @@
 [package]
 name = "pochan"
-version = "0.2.7"
+version = "0.2.8"
 description = "Pochan — local-first anime tracker with bubble visualization"
 authors = [""]
 edition = "2021"

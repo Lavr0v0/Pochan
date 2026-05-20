@@ -658,7 +658,7 @@ export function SettingsView(): JSX.Element {
               <div className="settings-view__credits-list">
                 <div className="settings-view__credits-item">
                   <span className="settings-view__credits-role">版本</span>
-                  <span className="settings-view__credits-name settings-view__credits-mono">v0.2.7</span>
+                  <span className="settings-view__credits-name settings-view__credits-mono">v0.2.8</span>
                 </div>
                 <div className="settings-view__credits-item">
                   <span className="settings-view__credits-role">开发</span>
