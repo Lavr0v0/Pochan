@@ -36,5 +36,12 @@
       "icons/icon.ico"
     ]
   },
-  "plugins": {}
+  "plugins": {
+    "updater": {
+      "endpoints": [
+        "https://github.com/Lavr0v0/Pochan/releases/latest/download/latest.json"
+      ],
+      "pubkey": ""
+    }
+  }
 }

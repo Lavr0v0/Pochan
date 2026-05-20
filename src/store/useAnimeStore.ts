@@ -30,6 +30,7 @@ import {
   type StorageAdapter,
 } from '../lib/storage';
 import { eventBus } from '../lib/eventBus';
+import { recordIncrement, recordDecrement } from '../lib/history';
 
 // ---------------------------------------------------------------------------
 // adapter 包装：捕获 save 失败并 emit 'storage:error'
@@ -253,20 +254,22 @@ export function createAnimeStore(deps: AnimeStoreDeps = {}): AnimeStoreHook {
       incrementWatched: (id) => {
         const prev = get().animes;
         let changed = false;
+        let newEpisodeCount = 0;
         const animes = prev.map((a) => {
           if (a.id !== id) return a;
-          // 已看完，不能再加
           if (a.totalEpisodes > 0 && a.watchedEpisodes >= a.totalEpisodes) return a;
           changed = true;
+          newEpisodeCount = a.watchedEpisodes + 1;
           return {
             ...a,
-            watchedEpisodes: a.watchedEpisodes + 1,
+            watchedEpisodes: newEpisodeCount,
             lastWatchedAt: nextWatchedAt(a.lastWatchedAt),
           };
         });
         if (!changed) return;
         set({ animes });
         persist(animes);
+        recordIncrement(id, newEpisodeCount);
       },
 
       /**
@@ -275,18 +278,21 @@ export function createAnimeStore(deps: AnimeStoreDeps = {}): AnimeStoreHook {
       decrementWatched: (id) => {
         const prev = get().animes;
         let changed = false;
+        let newEpisodeCount = 0;
         const animes = prev.map((a) => {
           if (a.id !== id) return a;
           if (a.watchedEpisodes <= 0) return a;
           changed = true;
+          newEpisodeCount = a.watchedEpisodes - 1;
           return {
             ...a,
-            watchedEpisodes: a.watchedEpisodes - 1,
+            watchedEpisodes: newEpisodeCount,
           };
         });
         if (!changed) return;
         set({ animes });
         persist(animes);
+        recordDecrement(id, newEpisodeCount);
       },
 
       /**

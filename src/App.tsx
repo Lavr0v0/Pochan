@@ -14,14 +14,15 @@ import { Toast } from './components/Toast';
 import { LibraryView } from './views/LibraryView';
 import { CalendarView } from './views/CalendarView';
 import { SettingsView } from './views/SettingsView';
+import { StatsView } from './views/StatsView';
 import { checkAndNotifyTodayAiring } from './lib/notification';
 import { shakeWindow } from './lib/windowEffects';
 import type { TrackedAnime } from './types';
 
 import './App.css';
 
-type PanelTab = 'library' | 'calendar' | 'settings';
-type MobileTab = 'bubble' | 'library' | 'calendar' | 'settings';
+type PanelTab = 'library' | 'calendar' | 'stats' | 'settings';
+type MobileTab = 'bubble' | 'library' | 'calendar' | 'stats' | 'settings';
 
 /** 检测是否为移动端视口 */
 function useIsMobile(): boolean {
@@ -217,11 +218,18 @@ function App(): JSX.Element {
           >
             设置
           </button>
+          <button
+            className={`app__panel-tab ${panelTab === 'stats' ? 'app__panel-tab--active' : ''}`}
+            onClick={() => setPanelTab('stats')}
+          >
+            统计
+          </button>
         </div>
         <div className="app__panel-content">
           {panelTab === 'library' && <LibraryView />}
           {panelTab === 'calendar' && <CalendarView />}
           {panelTab === 'settings' && <SettingsView />}
+          {panelTab === 'stats' && <StatsView />}
         </div>
       </div>
 
@@ -274,6 +282,13 @@ function App(): JSX.Element {
         >
           <span className="app__bottom-nav-icon" aria-hidden="true">⚙️</span>
           <span className="app__bottom-nav-label">设置</span>
+        </button>
+        <button
+          className={`app__bottom-nav-item${mobileTab === 'stats' ? ' app__bottom-nav-item--active' : ''}`}
+          onClick={() => handleMobileTabChange('stats')}
+        >
+          <span className="app__bottom-nav-icon" aria-hidden="true">📊</span>
+          <span className="app__bottom-nav-label">统计</span>
         </button>
       </nav>
 
