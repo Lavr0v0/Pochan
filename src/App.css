@@ -142,7 +142,7 @@
 .app__fab {
   position: absolute;
   bottom: 24px;
-  right: 24px;
+  left: 24px;
   padding: 10px 18px;
   border-radius: 20px;
   border: none;
@@ -156,8 +156,10 @@
   transition: transform 150ms ease, box-shadow 150ms ease;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
   z-index: 100;
+  line-height: 1;
 }
 
 .app__fab:hover {
@@ -242,7 +244,7 @@
   /* FAB 移动端保持紧凑 */
   .app__fab {
     bottom: 20px;
-    right: 20px;
+    left: 20px;
     padding: 10px 14px;
     font-size: 0.78rem;
   }

@@ -102,17 +102,19 @@ type SubjectStatus =
 
 interface FormState {
   status: 'airing' | 'finished' | 'upcoming';
-  /** 当前已看集数；用 string 以便支持空输入态，提交时再 parse */
+  /** 追番状态 */
+  watchStatus: 'watching' | 'plan' | 'completed';
+  /** 当前已看集数 */
   watchedEpisodes: string;
-  /** 新番更新日（0-6）；undefined 表示未选 */
+  /** 新番更新日（0-6） */
   airDay: number | undefined;
   /** 是否设置老番观影目标 */
   goalEnabled: boolean;
-  /** 老番目标集数（string） */
+  /** 老番目标集数 */
   goalTarget: string;
-  /** 老番截止日期 'YYYY-MM-DD' */
+  /** 老番截止日期 */
   goalDeadline: string;
-  /** 新番已播出集数（用于覆盖 totalEpisodes） */
+  /** 新番已播出集数 */
   _airedEpisodes?: number;
 }
 
@@ -224,6 +226,7 @@ export function AddAnimeDialog(props: AddAnimeDialogProps): JSX.Element | null {
   // 表单
   const [form, setForm] = useState<FormState>(() => ({
     status: 'airing',
+    watchStatus: 'watching',
     watchedEpisodes: '0',
     airDay: undefined,
     goalEnabled: false,
@@ -342,12 +345,12 @@ export function AddAnimeDialog(props: AddAnimeDialogProps): JSX.Element | null {
       setStage({ kind: 'configure', subject });
       setForm({
         status: autoStatus,
+        watchStatus: autoStatus === 'upcoming' ? 'plan' : 'watching',
         watchedEpisodes: '0',
         airDay: autoAirDay,
         goalEnabled: false,
         goalTarget: String(inferTargetEpisodes(subject)),
         goalDeadline: defaultDeadline(DEFAULT_DEADLINE_DAYS),
-        // 新番用已播出集数；老番用总集数
         _airedEpisodes: airedCount,
       });
       setSubmitError(null);
@@ -431,6 +434,8 @@ export function AddAnimeDialog(props: AddAnimeDialogProps): JSX.Element | null {
       }
 
       const tracked = bangumiSubjectToTrackedAnime(stage.subject, formInput);
+      // 设置追番状态
+      tracked.watchStatus = form.watchStatus === 'completed' ? 'completed' : form.watchStatus;
       // 新番：用已播出集数作为 totalEpisodes（当前上限）
       if (form.status === 'airing' && form._airedEpisodes && form._airedEpisodes > 0) {
         tracked.totalEpisodes = form._airedEpisodes;
@@ -763,39 +768,60 @@ function ConfigureStage(props: ConfigureStageProps): JSX.Element {
         </div>
       </div>
 
-      {/* 自动检测的类型信息（只读展示） */}
+      {/* 放送状态（只读） */}
       <div className="add-anime-dialog__field">
-        <span className="add-anime-dialog__label">状态（自动检测）</span>
-        <span style={{ fontSize: '0.9rem', color: 'var(--color-text)' }}>
+        <span className="add-anime-dialog__label">放送状态</span>
+        <span style={{ fontSize: '0.85rem', color: 'var(--color-text)' }}>
           {form.status === 'airing' ? '连载中' : form.status === 'upcoming' ? '未开播' : '完结'}
           {form.status === 'airing' && form.airDay !== undefined && (
-            <span style={{ marginLeft: 12, color: 'var(--color-text-soft)' }}>
+            <span style={{ marginLeft: 8, color: 'var(--color-text-soft)' }}>
               每{AIR_DAY_LABELS[form.airDay]}更新
-            </span>
-          )}
-          {form.status === 'airing' && form._airedEpisodes !== undefined && form._airedEpisodes > 0 && (
-            <span style={{ marginLeft: 12, color: 'var(--color-text-soft)' }}>
-              已播 {form._airedEpisodes} 集
             </span>
           )}
         </span>
       </div>
 
-      {/* 当前已看集数 */}
+      {/* 追番状态选择 */}
       <div className="add-anime-dialog__field">
-        <label className="add-anime-dialog__label" htmlFor="add-anime-watched">
-          当前已看集数
-        </label>
-        <input
-          id="add-anime-watched"
-          type="number"
-          min={0}
-          step={1}
-          className="add-anime-dialog__input"
-          value={form.watchedEpisodes}
-          onChange={(e) => onFormChange('watchedEpisodes', e.target.value)}
-        />
+        <span className="add-anime-dialog__label">追番状态</span>
+        <div className="add-anime-dialog__watch-status-options">
+          {form.status === 'finished' && (
+            <>
+              <button type="button" className={`add-anime-dialog__status-btn${form.watchStatus === 'completed' ? ' add-anime-dialog__status-btn--active' : ''}`} onClick={() => onFormChange('watchStatus', 'completed')}>看过</button>
+              <button type="button" className={`add-anime-dialog__status-btn${form.watchStatus === 'watching' ? ' add-anime-dialog__status-btn--active' : ''}`} onClick={() => onFormChange('watchStatus', 'watching')}>在看</button>
+              <button type="button" className={`add-anime-dialog__status-btn${form.watchStatus === 'plan' ? ' add-anime-dialog__status-btn--active' : ''}`} onClick={() => onFormChange('watchStatus', 'plan')}>想看</button>
+            </>
+          )}
+          {form.status === 'airing' && (
+            <>
+              <button type="button" className={`add-anime-dialog__status-btn${form.watchStatus === 'watching' ? ' add-anime-dialog__status-btn--active' : ''}`} onClick={() => onFormChange('watchStatus', 'watching')}>在看</button>
+              <button type="button" className={`add-anime-dialog__status-btn${form.watchStatus === 'plan' ? ' add-anime-dialog__status-btn--active' : ''}`} onClick={() => onFormChange('watchStatus', 'plan')}>想看</button>
+            </>
+          )}
+          {form.status === 'upcoming' && (
+            <button type="button" className={`add-anime-dialog__status-btn add-anime-dialog__status-btn--active`}>想看</button>
+          )}
+        </div>
       </div>
+
+      {/* 已看集数滑块（仅在看时显示） */}
+      {form.watchStatus === 'watching' && form.status !== 'upcoming' && (
+        <div className="add-anime-dialog__field">
+          <label className="add-anime-dialog__label" htmlFor="add-anime-watched">
+            已看集数：{form.watchedEpisodes}
+          </label>
+          <input
+            id="add-anime-watched"
+            type="range"
+            min={0}
+            max={form._airedEpisodes || (typeof subject.total_episodes === 'number' && subject.total_episodes > 0 ? subject.total_episodes : 24)}
+            step={1}
+            className="add-anime-dialog__slider"
+            value={form.watchedEpisodes}
+            onChange={(e) => onFormChange('watchedEpisodes', e.target.value)}
+          />
+        </div>
+      )}
 
       {submitError !== null && (
         <div className="add-anime-dialog__field-error" role="alert">
