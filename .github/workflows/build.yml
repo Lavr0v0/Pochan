@@ -1,10 +1,12 @@
-name: Build & Release
+name: Pochan Release
 
 on:
   push:
     tags:
       - 'v*'
   workflow_dispatch:
+
+run-name: "Pochan ${{ github.ref_name }}"
 
 jobs:
   build:
