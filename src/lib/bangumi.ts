@@ -346,10 +346,11 @@ export function bangumiSubjectToTrackedAnime(
   // 如果 air_weekday 不可用，从开播日期推算周几
   if (airDay === undefined) {
     const subjectDate = subject.date || subject.air_date;
-    if (subjectDate) {
-      const d = new Date(subjectDate);
+    if (subjectDate && subjectDate.length >= 10) {
+      const parts = subjectDate.slice(0, 10).split('-');
+      const d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
       if (!isNaN(d.getTime())) {
-        airDay = d.getDay(); // 0=周日, 1=周一, ..., 6=周六（和内部 airDay 一致）
+        airDay = d.getDay();
       }
     }
   }
@@ -477,8 +478,9 @@ export async function importFromBangumi(username: string): Promise<TrackedAnime[
       airDay = convertAirWeekday(subject.air_weekday);
     }
     // 如果 air_weekday 不可用，从开播日期推算
-    if (airDay === undefined && subjectAirDate) {
-      const d = new Date(subjectAirDate);
+    if (airDay === undefined && subjectAirDate && subjectAirDate.length >= 10) {
+      const parts = subjectAirDate.slice(0, 10).split('-');
+      const d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
       if (!isNaN(d.getTime())) {
         airDay = d.getDay();
       }
@@ -500,6 +502,7 @@ export async function importFromBangumi(username: string): Promise<TrackedAnime[
       nameCn,
       cover: subject.images?.large ?? '',
       totalEpisodes,
+      plannedEpisodes: totalEpisodes > 0 ? totalEpisodes : undefined,
       watchedEpisodes: item.ep_status ?? 0,
       initialWatchedEpisodes: item.ep_status ?? 0,
       lastWatchedAt: now,

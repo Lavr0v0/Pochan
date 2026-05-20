@@ -25,7 +25,7 @@
 .anime-detail-modal__card {
   position: relative;
   z-index: 1200;
-  width: min(520px, 100%);
+  width: min(70vw, 100%);
   max-height: calc(100vh - 32px);
   background-color: var(--color-bg);
   border-radius: var(--radius-lg);

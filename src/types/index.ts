@@ -45,8 +45,10 @@ export interface TrackedAnime {
   nameCn: string;
   /** 封面图 URL（lain.bgm.tv） */
   cover: string;
-  /** 总集数 */
+  /** 总集数（对于连载中的番，这是当前已播出的集数） */
   totalEpisodes: number;
+  /** 计划总集数（来自 Bangumi，用于日历播出范围计算；连载中的番此值为真实总集数） */
+  plannedEpisodes?: number;
 
   // —— 追番状态 ——
   /** 已观看集数 */

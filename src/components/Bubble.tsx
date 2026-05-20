@@ -192,9 +192,13 @@ const BubbleImpl = forwardRef<HTMLDivElement, BubbleProps>(function Bubble(props
       {/* Hover tooltip */}
       <div className="bubble__tooltip">
         <span className="bubble__tooltip-name">{displayName}</span>
-        <span className="bubble__tooltip-progress">
-          {anime.watchedEpisodes} / {totalDisplay}
-        </span>
+        {anime.status === 'upcoming' ? (
+          <span className="bubble__tooltip-progress">未开播</span>
+        ) : (
+          <span className="bubble__tooltip-progress">
+            {anime.watchedEpisodes} / {totalDisplay}
+          </span>
+        )}
         <span className="bubble__tooltip-meta">
           {anime.lastWatchedAt
             ? `上次 ${new Date(anime.lastWatchedAt).toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' })}`

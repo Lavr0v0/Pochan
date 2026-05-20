@@ -11,6 +11,7 @@ import { useAnimeStore } from './store/useAnimeStore';
 import { BubbleCanvas } from './components/BubbleCanvas';
 import { AddAnimeDialog } from './components/AddAnimeDialog';
 import { Toast } from './components/Toast';
+import { Tutorial, isTutorialCompleted } from './components/Tutorial';
 import { LibraryView } from './views/LibraryView';
 import { CalendarView } from './views/CalendarView';
 import { SettingsView } from './views/SettingsView';
@@ -47,6 +48,7 @@ function App(): JSX.Element {
   const [addOpen, setAddOpen] = useState(false);
   const [completingId, setCompletingId] = useState<number | null>(null);
   const [updateAvailable, setUpdateAvailable] = useState<string | null>(null);
+  const [tutorialOpen, setTutorialOpen] = useState(false);
   const isMobile = useIsMobile();
   const isLoaded = useAnimeStore((s) => s.isLoaded);
   const loadFromDisk = useAnimeStore((s) => s.loadFromDisk);
@@ -65,7 +67,19 @@ function App(): JSX.Element {
         }
       });
     }).catch(() => {});
+    // 首次打开时显示新手引导
+    if (!isTutorialCompleted()) {
+      // 延迟一点让界面先渲染完
+      setTimeout(() => setTutorialOpen(true), 600);
+    }
   }, [loadFromDisk]);
+
+  // 监听设置中「重新引导」的自定义事件
+  useEffect(() => {
+    const handler = () => setTutorialOpen(true);
+    window.addEventListener('pochan:restart-tutorial', handler);
+    return () => window.removeEventListener('pochan:restart-tutorial', handler);
+  }, []);
 
   // 数据加载完成后：刷新放送状态 + 检查今日更新通知
   useEffect(() => {
@@ -83,11 +97,21 @@ function App(): JSX.Element {
       if (anime.airDate > todayStr) {
         // 还没开播
         correctStatus = 'upcoming';
-      } else if (anime.totalEpisodes > 0) {
-        // 有总集数：估算结束日 = 开播日 + 总集数 × 7天
-        const startDate = new Date(anime.airDate);
-        const estimatedEnd = new Date(startDate.getTime() + anime.totalEpisodes * 7 * 24 * 60 * 60 * 1000);
-        correctStatus = now < estimatedEnd ? 'airing' : 'finished';
+      } else if ((anime.plannedEpisodes ?? anime.totalEpisodes) > 0) {
+        // 有总集数：估算结束日 = 开播日 + 计划总集数 × 7天
+        const eps = anime.plannedEpisodes ?? anime.totalEpisodes;
+        const parts = anime.airDate.slice(0, 10).split('-');
+        const startLocal = new Date(
+          Number(parts[0]),
+          Number(parts[1]) - 1,
+          Number(parts[2]),
+        );
+        const endLocal = new Date(
+          startLocal.getFullYear(),
+          startLocal.getMonth(),
+          startLocal.getDate() + eps * 7,
+        );
+        correctStatus = now < endLocal ? 'airing' : 'finished';
       } else {
         // 总集数未知 + 已开播 + 有 airDay → 连载中
         correctStatus = anime.airDay !== undefined ? 'airing' : 'finished';
@@ -262,6 +286,14 @@ function App(): JSX.Element {
           {panelTab === 'settings' && <SettingsView />}
           {panelTab === 'stats' && <StatsView />}
         </div>
+        {/* 添加按钮：左侧面板右下角 */}
+        <button
+          className="app__panel-fab"
+          onClick={() => setAddOpen(true)}
+          aria-label="添加番剧"
+        >
+          ＋
+        </button>
       </div>
 
       {/* 右侧气泡画布（移动端：仅 bubble tab 时显示） */}
@@ -273,14 +305,6 @@ function App(): JSX.Element {
           onBubbleDoubleClick={handleBubbleDoubleClick}
           onBubbleContextMenu={handleBubbleContextMenu}
         />
-        {/* FAB 添加按钮 */}
-        <button
-          className="app__fab"
-          onClick={() => setAddOpen(true)}
-          aria-label="添加番剧"
-        >
-          ＋ 添加番剧
-        </button>
       </div>
       </div>
 
@@ -328,6 +352,9 @@ function App(): JSX.Element {
         <AddAnimeDialog open={addOpen} onClose={() => setAddOpen(false)} />
       )}
       <Toast />
+
+      {/* 新手引导 */}
+      <Tutorial open={tutorialOpen} onClose={() => setTutorialOpen(false)} />
     </div>
   );
 }

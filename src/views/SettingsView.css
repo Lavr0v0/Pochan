@@ -346,6 +346,19 @@
   margin: 4px 0;
 }
 
+.settings-view__card-subheading {
+  margin: 0;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.settings-view__clear-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .settings-view__credits-mono {
   font-family: var(--font-mono);
   font-size: 0.8rem;

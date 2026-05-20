@@ -35,6 +35,7 @@ import { readTextFile, writeTextFile } from '@tauri-apps/plugin-fs';
 import { useAnimeStore } from '../store/useAnimeStore';
 import { importFromBangumi, BangumiError } from '../lib/bangumi';
 import { applyTheme, getStoredTheme, setStoredTheme, getUnlockedThemes, checkAndUnlockThemes, unlockPinkTheme, redeemGoldTheme, THEME_UNLOCK_CONDITIONS, SPECIAL_THEMES } from '../lib/theme';
+import { resetTutorial } from '../components/Tutorial';
 import type { ThemeMode } from '../lib/theme';
 
 import './SettingsView.css';
@@ -93,8 +94,11 @@ export function SettingsView(): JSX.Element {
   const [exporting, setExporting] = useState<boolean>(false);
   const [importing, setImporting] = useState<boolean>(false);
 
-  // —— 清空确认行 ——
-  const [confirmingClear, setConfirmingClear] = useState<boolean>(false);
+  // —— 清空确认流程 ——
+  type ClearTarget = 'all' | 'preferences' | 'animes' | 'history';
+  type ClearStage = 'idle' | 'first' | 'final';
+  const [clearTarget, setClearTarget] = useState<ClearTarget | null>(null);
+  const [clearStage, setClearStage] = useState<ClearStage>('idle');
 
   // —— Bangumi 导入 ——
   const [bangumiUsername, setBangumiUsername] = useState<string>('');
@@ -284,28 +288,91 @@ export function SettingsView(): JSX.Element {
   }, [importJson, importing]);
 
   // -------------------------------------------------------------------------
-  // 清空全部数据
+  // 清空数据（多类型 + 两步确认）
   //
-  // 流程（内联确认）：
-  //   1. 点击「清空全部数据」→ 显示确认行
-  //   2. 用户点「取消」→ 关闭确认行
-  //   3. 用户点「确认清空」→ store.clearAll() → 显示「已清空」
+  // 流程：
+  //   1. 点击某种清空按钮 → 进入 'first' 阶段（显示：取消 / 备份 / 继续清理）
+  //   2. 点击「备份」→ 执行导出，然后进入 'final' 阶段
+  //   3. 点击「继续清理」→ 直接进入 'final' 阶段
+  //   4. 'final' 阶段：最终确认（取消 / 确认清空）
+  //   5. 确认 → 执行对应清空操作
   // -------------------------------------------------------------------------
 
-  const handleRequestClear = useCallback(() => {
+  const handleRequestClear = useCallback((target: 'all' | 'preferences' | 'animes' | 'history') => {
     setClearStatus(null);
-    setConfirmingClear(true);
+    setClearTarget(target);
+    setClearStage('first');
   }, []);
 
-  const handleCancelClear = useCallback(() => {
-    setConfirmingClear(false);
+  const handleClearCancel = useCallback(() => {
+    setClearTarget(null);
+    setClearStage('idle');
   }, []);
 
-  const handleConfirmClear = useCallback(() => {
-    clearAll();
-    setConfirmingClear(false);
-    setClearStatus({ kind: 'success', text: '已清空' });
-  }, [clearAll]);
+  const handleClearBackupThenConfirm = useCallback(async () => {
+    // 先执行备份
+    try {
+      const path = await save({
+        defaultPath: defaultExportFileName(),
+        filters: [{ name: JSON_FILTER.name, extensions: [...JSON_FILTER.extensions] }],
+      });
+      if (path === null || path === undefined) {
+        // 用户取消了备份对话框，回到 first 阶段
+        return;
+      }
+      const content = exportJson();
+      await writeTextFile(path, content);
+    } catch (err) {
+      setClearStatus({ kind: 'error', text: `备份失败：${toErrorMessage(err)}` });
+      return;
+    }
+    // 备份成功，进入最终确认
+    setClearStage('final');
+  }, [exportJson]);
+
+  const handleClearContinue = useCallback(() => {
+    setClearStage('final');
+  }, []);
+
+  const handleClearConfirm = useCallback(() => {
+    const target = clearTarget;
+    if (!target) return;
+
+    switch (target) {
+      case 'all':
+        // 清空所有：番剧 + 历史 + 个性化
+        clearAll();
+        localStorage.removeItem('pochan-watch-history');
+        localStorage.removeItem('pochan-theme');
+        localStorage.removeItem('pochan-themes-unlocked');
+        localStorage.removeItem('pochan-tutorial-completed');
+        setClearStatus({ kind: 'success', text: '已清空所有数据' });
+        break;
+      case 'preferences':
+        // 清空个性化设置：主题、解锁主题、新手引导标记
+        localStorage.removeItem('pochan-theme');
+        localStorage.removeItem('pochan-themes-unlocked');
+        localStorage.removeItem('pochan-tutorial-completed');
+        applyTheme('light');
+        setTheme('light');
+        setUnlockedThemes([]);
+        setClearStatus({ kind: 'success', text: '已重置个性化设置' });
+        break;
+      case 'animes':
+        // 清空番剧数据
+        clearAll();
+        setClearStatus({ kind: 'success', text: '已清空番剧数据' });
+        break;
+      case 'history':
+        // 清空观看历史
+        localStorage.removeItem('pochan-watch-history');
+        setClearStatus({ kind: 'success', text: '已清空统计数据' });
+        break;
+    }
+
+    setClearTarget(null);
+    setClearStage('idle');
+  }, [clearTarget, clearAll]);
 
   // -------------------------------------------------------------------------
   // 渲染
@@ -468,34 +535,95 @@ export function SettingsView(): JSX.Element {
 
             <div className="settings-view__divider" />
 
-            {!confirmingClear ? (
-              <div className="settings-view__actions">
+            <h3 className="settings-view__card-subheading">清空数据</h3>
+
+            {clearStage === 'idle' && (
+              <div className="settings-view__clear-options">
                 <button
                   type="button"
                   className="settings-view__button settings-view__button--danger"
-                  onClick={handleRequestClear}
+                  onClick={() => handleRequestClear('all')}
+                >
+                  全部清空
+                </button>
+                <button
+                  type="button"
+                  className="settings-view__button settings-view__button--danger"
+                  onClick={() => handleRequestClear('animes')}
                   disabled={animeCount === 0}
                 >
-                  清空数据
+                  清空番剧
+                </button>
+                <button
+                  type="button"
+                  className="settings-view__button settings-view__button--danger"
+                  onClick={() => handleRequestClear('history')}
+                >
+                  清空统计数据
+                </button>
+                <button
+                  type="button"
+                  className="settings-view__button settings-view__button--danger"
+                  onClick={() => handleRequestClear('preferences')}
+                >
+                  重置个性化
                 </button>
               </div>
-            ) : (
-              <div className="settings-view__confirm" role="alertdialog" aria-label="确认清空">
+            )}
+
+            {clearStage === 'first' && clearTarget && (
+              <div className="settings-view__confirm" role="alertdialog" aria-label="清空确认第一步">
                 <span className="settings-view__confirm-text">
-                  这会删除所有本地追番记录，且无法撤销。
+                  {clearTarget === 'all' && '即将清空所有数据（番剧、统计、个性化设置），建议先备份。'}
+                  {clearTarget === 'animes' && '即将清空所有番剧数据，建议先备份。'}
+                  {clearTarget === 'history' && '即将清空所有观看统计数据，此操作不可撤销。'}
+                  {clearTarget === 'preferences' && '即将重置所有个性化设置（主题、解锁进度、引导状态）。'}
                 </span>
                 <div className="settings-view__confirm-actions">
                   <button
                     type="button"
                     className="settings-view__button"
-                    onClick={handleCancelClear}
+                    onClick={handleClearCancel}
+                  >
+                    取消
+                  </button>
+                  {(clearTarget === 'all' || clearTarget === 'animes') && (
+                    <button
+                      type="button"
+                      className="settings-view__button settings-view__button--primary"
+                      onClick={handleClearBackupThenConfirm}
+                    >
+                      先备份
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    className="settings-view__button settings-view__button--danger"
+                    onClick={handleClearContinue}
+                  >
+                    继续清理
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {clearStage === 'final' && clearTarget && (
+              <div className="settings-view__confirm" role="alertdialog" aria-label="最终确认">
+                <span className="settings-view__confirm-text">
+                  确定要执行此操作吗？此操作无法撤销。
+                </span>
+                <div className="settings-view__confirm-actions">
+                  <button
+                    type="button"
+                    className="settings-view__button"
+                    onClick={handleClearCancel}
                   >
                     取消
                   </button>
                   <button
                     type="button"
                     className="settings-view__button settings-view__button--danger-confirm"
-                    onClick={handleConfirmClear}
+                    onClick={handleClearConfirm}
                     autoFocus
                   >
                     确认清空
@@ -503,6 +631,7 @@ export function SettingsView(): JSX.Element {
                 </div>
               </div>
             )}
+
             {clearStatus && (
               <p
                 className={`settings-view__status settings-view__status--${clearStatus.kind}`}
@@ -520,7 +649,7 @@ export function SettingsView(): JSX.Element {
               <div className="settings-view__credits-list">
                 <div className="settings-view__credits-item">
                   <span className="settings-view__credits-role">版本</span>
-                  <span className="settings-view__credits-name settings-view__credits-mono">v0.2.5</span>
+                  <span className="settings-view__credits-name settings-view__credits-mono">v0.2.7</span>
                 </div>
                 <div className="settings-view__credits-item">
                   <span className="settings-view__credits-role">开发</span>
@@ -553,6 +682,22 @@ export function SettingsView(): JSX.Element {
                   <span className="settings-view__credits-name">MIT</span>
                 </div>
               </div>
+            </div>
+            <div className="settings-view__divider" />
+            <div className="settings-view__actions">
+              <button
+                type="button"
+                className="settings-view__button"
+                onClick={() => {
+                  resetTutorial();
+                  window.dispatchEvent(new CustomEvent('pochan:restart-tutorial'));
+                }}
+              >
+                重新引导
+              </button>
+              <span className="settings-view__card-desc" style={{ margin: 0 }}>
+                重新查看新手引导教程
+              </span>
             </div>
           </section>
         </div>

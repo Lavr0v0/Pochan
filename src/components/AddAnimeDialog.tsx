@@ -174,12 +174,13 @@ function inferAirDay(subject: BangumiSubject): number | undefined {
   if (w !== undefined && Number.isInteger(w) && w >= 1 && w <= 7) {
     return convertAirWeekday(w);
   }
-  // 从开播日期推算周几
+  // 从开播日期推算周几（用本地时间解析避免时区偏移）
   const airDate = subject.date || subject.air_date;
-  if (airDate) {
-    const d = new Date(airDate);
+  if (airDate && airDate.length >= 10) {
+    const parts = airDate.slice(0, 10).split('-');
+    const d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
     if (!isNaN(d.getTime())) {
-      return d.getDay(); // 0=周日, 和内部 airDay 一致
+      return d.getDay(); // 本地时间的周几
     }
   }
   return undefined;
@@ -436,9 +437,13 @@ export function AddAnimeDialog(props: AddAnimeDialogProps): JSX.Element | null {
       const tracked = bangumiSubjectToTrackedAnime(stage.subject, formInput);
       // 设置追番状态
       tracked.watchStatus = form.watchStatus === 'completed' ? 'completed' : form.watchStatus;
-      // 新番：用已播出集数作为 totalEpisodes（当前上限）
+      // 新番：totalEpisodes 用已播出集数（用于进度环/进度条显示）
+      // plannedEpisodes 保留真实总集数（用于日历播出范围计算）
       if (form.status === 'airing' && form._airedEpisodes && form._airedEpisodes > 0) {
-        tracked.totalEpisodes = form._airedEpisodes;
+        tracked.plannedEpisodes = tracked.totalEpisodes; // 保存真实总集数
+        tracked.totalEpisodes = form._airedEpisodes; // 进度显示用已播出集数
+      } else if (tracked.totalEpisodes > 0) {
+        tracked.plannedEpisodes = tracked.totalEpisodes;
       }
       addAnime(tracked);
       // 集数未知时提示用户

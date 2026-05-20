@@ -88,6 +88,7 @@
   flex-direction: column;
   background-color: var(--color-bg);
   border-right: 1px solid var(--color-border);
+  position: relative;
 }
 
 .app__panel-tabs {
@@ -138,28 +139,36 @@
   position: relative;
 }
 
-/* FAB 添加按钮（桌面端：pill button） */
-.app__fab {
+/* 添加按钮：左侧面板右下角圆形 + 号 */
+.app__panel-fab {
   position: absolute;
   bottom: 24px;
-  left: 24px;
-  padding: 10px 18px;
-  border-radius: 20px;
+  right: 24px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
   border: none;
   background-color: var(--color-text);
   color: var(--color-bg);
-  font-size: 0.82rem;
+  font-size: 1.4rem;
   font-weight: 500;
-  font-family: var(--font-sans);
   cursor: pointer;
   box-shadow: var(--shadow-floating);
   transition: transform 150ms ease, box-shadow 150ms ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
   z-index: 100;
   line-height: 1;
+}
+
+.app__panel-fab:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-floating);
+}
+
+.app__panel-fab:active {
+  transform: translateY(0);
 }
 
 .app__fab:hover {
@@ -242,11 +251,12 @@
   }
 
   /* FAB 移动端保持紧凑 */
-  .app__fab {
-    bottom: 20px;
-    left: 20px;
-    padding: 10px 14px;
-    font-size: 0.78rem;
+  .app__panel-fab {
+    bottom: 70px;
+    right: 16px;
+    width: 40px;
+    height: 40px;
+    font-size: 1.2rem;
   }
 
   /* 底部导航栏 */

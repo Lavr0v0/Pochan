@@ -1,0 +1,154 @@
+/**
+ * Tutorial 新手引导样式
+ *
+ * 设计要点：
+ *   - overlay 使用半透明黑色背景
+ *   - 聚光灯效果通过 box-shadow 实现（大面积阴影 + 透明中心）
+ *   - 提示卡片使用圆角 + 阴影，与应用整体风格一致
+ *   - z-index 2000 确保在所有其他元素之上
+ */
+
+.tutorial-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background-color: rgba(42, 39, 35, 0.55);
+  pointer-events: auto;
+}
+
+/* 聚光灯高亮区域 */
+.tutorial-spotlight {
+  position: fixed;
+  border-radius: var(--radius-md, 8px);
+  box-shadow: 0 0 0 9999px rgba(42, 39, 35, 0.55);
+  z-index: 2001;
+  pointer-events: none;
+  transition: all 300ms ease;
+}
+
+/* 提示卡片 */
+.tutorial-tooltip {
+  position: fixed;
+  z-index: 2002;
+  width: min(380px, calc(100vw - 32px));
+  background-color: var(--color-bg, #fff);
+  border-radius: var(--radius-lg, 12px);
+  box-shadow: 0 16px 48px rgba(42, 39, 35, 0.24);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.tutorial-tooltip__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.tutorial-tooltip__title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-text, #2a2723);
+}
+
+.tutorial-tooltip__step-indicator {
+  font-size: 0.75rem;
+  color: var(--color-text-soft, #8a8580);
+  flex-shrink: 0;
+}
+
+.tutorial-tooltip__description {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--color-text, #2a2723);
+  line-height: 1.65;
+  white-space: pre-wrap;
+}
+
+.tutorial-tooltip__actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.tutorial-tooltip__skip {
+  padding: 6px 12px;
+  border: none;
+  background: none;
+  color: var(--color-text-soft, #8a8580);
+  font-family: inherit;
+  font-size: 0.82rem;
+  cursor: pointer;
+  border-radius: var(--radius-sm, 6px);
+  transition: background-color 100ms ease;
+}
+
+.tutorial-tooltip__skip:hover {
+  background-color: var(--color-bg-soft, #f5f3f0);
+  color: var(--color-text, #2a2723);
+}
+
+.tutorial-tooltip__nav {
+  display: flex;
+  gap: 8px;
+}
+
+.tutorial-tooltip__prev {
+  padding: 7px 14px;
+  border-radius: var(--radius-sm, 6px);
+  border: 1px solid var(--color-border-strong, #d4d0cc);
+  background-color: var(--color-bg-surface, #fff);
+  color: var(--color-text, #2a2723);
+  font-family: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background-color 100ms ease;
+}
+
+.tutorial-tooltip__prev:hover {
+  background-color: var(--color-bg-soft, #f5f3f0);
+}
+
+.tutorial-tooltip__next {
+  padding: 7px 16px;
+  border-radius: var(--radius-sm, 6px);
+  border: none;
+  background-color: var(--color-text, #2a2723);
+  color: var(--color-bg, #fff);
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 100ms ease;
+}
+
+.tutorial-tooltip__next:hover {
+  opacity: 0.88;
+}
+
+/* 步骤点指示器 */
+.tutorial-tooltip__dots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding-top: 4px;
+}
+
+.tutorial-tooltip__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--color-border-strong, #d4d0cc);
+  transition: background-color 200ms ease, transform 200ms ease;
+}
+
+.tutorial-tooltip__dot--active {
+  background-color: var(--color-text, #2a2723);
+  transform: scale(1.3);
+}

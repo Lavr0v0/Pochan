@@ -1,9 +1,6 @@
 /**
  * CalendarView 日历视图
  *
- * 实现 design.md "Components and Interfaces / CalendarView" 与
- * requirements.md Requirement 4（日历视图）。
- *
  * 视觉布局：
  *   - 顶部 header：← / → 月份导航 + 当前年月显示 + 「今天」按钮（跳回当月）
  *   - 周几标题行：周日 周一 周二 周三 周四 周五 周六（7 列）
@@ -17,8 +14,7 @@
  *
  * 交互：
  *   - 点击格子内番剧封面 → 打开 AnimeDetailModal（局部 state 维护当前 detailAnimeId）
- *   - 点击格子空白处 → 弹出「快速记录今天看了哪几部」多选弹层；显示全部 anime
- *     （不按日期过滤），用户多选后提交，对每部 incrementWatched(id) 一次。
+ *   - 点击格子空白处 → 弹出当日观看记录弹层，展示该天的观看历史
  *
  * 日期算法：
  *   - 仅使用原生 Date API；不引入第三方库
@@ -29,17 +25,15 @@
  * 与 BubbleView 一致的细节：
  *   - 图片设置 referrerPolicy="no-referrer"；onError → 调色板色 + 番名首字
  *   - AnimeDetailModal 通过 anime: TrackedAnime | null 控制开关
- *
- * Validates: Requirements 4.1, 4.2, 4.3, 4.4, 4.5, 4.6
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import type { ChangeEvent } from 'react';
 
 import { useAnimeStore } from '../store/useAnimeStore';
 import type { TrackedAnime } from '../types';
 import { pickPaletteColor } from '../types';
 import { AnimeDetailModal } from '../components/AnimeDetailModal';
+import { getHistory } from '../lib/history';
 
 import './CalendarView.css';
 
@@ -109,7 +103,6 @@ interface CalendarCell {
 
 export function CalendarView(): JSX.Element {
   const animes = useAnimeStore((s) => s.animes);
-  const incrementWatched = useAnimeStore((s) => s.incrementWatched);
 
   // —— 当前显示的年月 ——
   const [cursor, setCursor] = useState<{ year: number; month: number }>(() => {
@@ -120,8 +113,8 @@ export function CalendarView(): JSX.Element {
   // —— 详情 modal ——
   const [detailAnimeId, setDetailAnimeId] = useState<number | null>(null);
 
-  // —— 快速记录弹层：null 表示未打开；string 为 'YYYY-MM-DD'（用户点击的格子日期） ——
-  const [quickWatchDateKey, setQuickWatchDateKey] = useState<string | null>(null);
+  // —— 当日观看记录弹层：null 表示未打开；string 为 'YYYY-MM-DD'（用户点击的格子日期） ——
+  const [historyDateKey, setHistoryDateKey] = useState<string | null>(null);
 
   // -------------------------------------------------------------------------
   // 派生数据
@@ -148,15 +141,14 @@ export function CalendarView(): JSX.Element {
   }, [cursor.year, cursor.month]);
 
   /**
-   * airing 番按 airDay 分组（airDay ∈ [0, 6]）。
+   * 有 airDay 的番按 airDay 分组（airDay ∈ [0, 6]）。
    *
-   * 顺序保留 store 中的添加顺序，保证渲染稳定性。
-   * 没有 airDay 的 airing 番不出现在更新日列中（与 Property 22 一致）。
+   * 包含所有有 airDay 和 airDate 的番（不限 status），
+   * 在格子级别再用日期范围过滤是否显示。
    */
   const airingByDay = useMemo<TrackedAnime[][]>(() => {
     const buckets: TrackedAnime[][] = [[], [], [], [], [], [], []];
     for (const a of animes) {
-      if (a.status !== 'airing') continue;
       if (typeof a.airDay !== 'number') continue;
       if (a.airDay < 0 || a.airDay > 6) continue;
       buckets[a.airDay]!.push(a);
@@ -216,22 +208,12 @@ export function CalendarView(): JSX.Element {
   }, []);
 
   const handleCellEmptyClick = useCallback((dateKey: string) => {
-    setQuickWatchDateKey(dateKey);
+    setHistoryDateKey(dateKey);
   }, []);
 
-  const handleQuickWatchClose = useCallback(() => {
-    setQuickWatchDateKey(null);
+  const handleHistoryClose = useCallback(() => {
+    setHistoryDateKey(null);
   }, []);
-
-  const handleQuickWatchSubmit = useCallback(
-    (selectedIds: number[]) => {
-      for (const id of selectedIds) {
-        incrementWatched(id);
-      }
-      setQuickWatchDateKey(null);
-    },
-    [incrementWatched],
-  );
 
   // -------------------------------------------------------------------------
   // 渲染
@@ -284,7 +266,34 @@ export function CalendarView(): JSX.Element {
 
       <div className="calendar-view__grid" role="grid">
         {cells.map((cell) => {
-          const airingList = airingByDay[cell.dayOfWeek] ?? [];
+          // 过滤番剧：只显示在该格日期处于播出期间内的番剧
+          const allForDay = airingByDay[cell.dayOfWeek] ?? [];
+          const airingList = allForDay.filter((anime) => {
+            // 没有 airDate 的不显示在日历上（无法确定播出范围）
+            if (!anime.airDate) return false;
+            // 格子日期 < 开播日期 → 还没开播，不显示
+            // 使用字符串比较（YYYY-MM-DD 格式天然支持字典序比较）
+            const airDateKey = anime.airDate.slice(0, 10);
+            if (cell.dateKey < airDateKey) return false;
+            // 用 plannedEpisodes（真实总集数）计算播出范围，回退到 totalEpisodes
+            const eps = anime.plannedEpisodes ?? anime.totalEpisodes;
+            if (eps > 0) {
+              const parts = airDateKey.split('-');
+              const startLocal = new Date(
+                Number(parts[0]),
+                Number(parts[1]) - 1,
+                Number(parts[2]),
+              );
+              const endLocal = new Date(
+                startLocal.getFullYear(),
+                startLocal.getMonth(),
+                startLocal.getDate() + eps * 7,
+              );
+              const endKey = `${endLocal.getFullYear()}-${String(endLocal.getMonth() + 1).padStart(2, '0')}-${String(endLocal.getDate()).padStart(2, '0')}`;
+              if (cell.dateKey > endKey) return false;
+            }
+            return true;
+          });
           const goalList = goalByDate.get(cell.dateKey) ?? [];
           return (
             <CalendarCellView
@@ -299,12 +308,12 @@ export function CalendarView(): JSX.Element {
         })}
       </div>
 
-      {quickWatchDateKey !== null && (
-        <QuickWatchDialog
-          dateKey={quickWatchDateKey}
+      {historyDateKey !== null && (
+        <DayHistoryDialog
+          dateKey={historyDateKey}
           animes={animes}
-          onClose={handleQuickWatchClose}
-          onSubmit={handleQuickWatchSubmit}
+          onClose={handleHistoryClose}
+          onAnimeClick={handleAnimeClick}
         />
       )}
 
@@ -523,22 +532,32 @@ function GoalRow(props: GoalRowProps): JSX.Element {
 }
 
 // ---------------------------------------------------------------------------
-// 子组件：快速记录对话框
+// 子组件：当日观看记录弹层
 //
-// 显示当前所有 anime（不按日期过滤；用户可挑选今天看了的任意番剧）。
-// 多选 + 提交：对每部所选 anime 调用 incrementWatched。
+// 显示指定日期的观看历史记录（来自 localStorage 的 history 数据）。
+// 按番剧分组，展示每部番当天看了几集。
 // ---------------------------------------------------------------------------
 
-interface QuickWatchDialogProps {
+interface DayHistoryDialogProps {
   dateKey: string;
   animes: TrackedAnime[];
   onClose: () => void;
-  onSubmit: (selectedIds: number[]) => void;
+  onAnimeClick: (animeId: number) => void;
 }
 
-function QuickWatchDialog(props: QuickWatchDialogProps): JSX.Element {
-  const { dateKey, animes, onClose, onSubmit } = props;
-  const [selected, setSelected] = useState<Set<number>>(() => new Set());
+/** 按番剧分组的当日观看摘要 */
+interface DayAnimeSummary {
+  animeId: number;
+  animeName: string;
+  cover: string;
+  incrementCount: number;
+  decrementCount: number;
+  /** 净观看集数 */
+  netCount: number;
+}
+
+function DayHistoryDialog(props: DayHistoryDialogProps): JSX.Element {
+  const { dateKey, animes, onClose, onAnimeClick } = props;
 
   // ESC 关闭
   useEffect(() => {
@@ -551,37 +570,61 @@ function QuickWatchDialog(props: QuickWatchDialogProps): JSX.Element {
     };
   }, [onClose]);
 
-  const toggle = (id: number): void => {
-    setSelected((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
+  // 获取当天的历史记录
+  const daySummaries = useMemo<DayAnimeSummary[]>(() => {
+    // 按本地日期匹配：将每条记录的 timestamp 转为本地日期字符串再比较
+    const entries = getHistory().filter((e) => {
+      const localDate = new Date(e.timestamp);
+      const y = localDate.getFullYear();
+      const m = String(localDate.getMonth() + 1).padStart(2, '0');
+      const d = String(localDate.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}` === dateKey;
     });
-  };
 
-  const handleCheckboxChange = (e: ChangeEvent<HTMLInputElement>): void => {
-    const id = Number(e.target.value);
-    if (Number.isFinite(id)) toggle(id);
-  };
+    // 按 animeId 分组
+    const grouped = new Map<number, { inc: number; dec: number }>();
+    for (const entry of entries) {
+      const existing = grouped.get(entry.animeId) ?? { inc: 0, dec: 0 };
+      if (entry.action === 'increment') existing.inc++;
+      else existing.dec++;
+      grouped.set(entry.animeId, existing);
+    }
 
-  const handleSubmit = (): void => {
-    onSubmit(Array.from(selected));
-  };
+    // 构建摘要
+    const summaries: DayAnimeSummary[] = [];
+    const animeMap = new Map(animes.map((a) => [a.id, a]));
+    for (const [animeId, counts] of grouped) {
+      const anime = animeMap.get(animeId);
+      const name = anime ? (anime.nameCn || anime.name || '(未命名)') : `番剧 #${animeId}`;
+      const cover = anime?.cover ?? '';
+      summaries.push({
+        animeId,
+        animeName: name,
+        cover,
+        incrementCount: counts.inc,
+        decrementCount: counts.dec,
+        netCount: counts.inc - counts.dec,
+      });
+    }
+
+    // 按净观看集数降序排列
+    summaries.sort((a, b) => b.netCount - a.netCount);
+    return summaries;
+  }, [dateKey, animes]);
 
   const stopPropagation = (e: React.MouseEvent): void => {
     e.stopPropagation();
   };
 
-  // 标题日期格式化（'YYYY-MM-DD' → 'YYYY 年 M 月 D 日'）
   const titleLabel = formatDateKey(dateKey);
+  const totalNet = daySummaries.reduce((sum, s) => sum + Math.max(0, s.netCount), 0);
 
   return (
     <div
       className="calendar-view__quick-overlay"
       role="dialog"
       aria-modal="true"
-      aria-label="快速记录"
+      aria-label="当日观看记录"
       onClick={onClose}
     >
       <div
@@ -591,42 +634,41 @@ function QuickWatchDialog(props: QuickWatchDialogProps): JSX.Element {
       >
         <header className="calendar-view__quick-header">
           <h3 className="calendar-view__quick-title">
-            {titleLabel} 看了哪几部？
+            {titleLabel} 的观看记录
           </h3>
-          <p className="calendar-view__quick-hint">
-            勾选后点击「记录」会把所选番剧的已看集数 +1。
-          </p>
+          {totalNet > 0 && (
+            <p className="calendar-view__quick-hint">
+              当天共看了 {totalNet} 集
+            </p>
+          )}
         </header>
 
         <ul className="calendar-view__quick-list">
-          {animes.length === 0 && (
+          {daySummaries.length === 0 && (
             <li className="calendar-view__quick-empty">
-              还没有追番。先去添加一部吧。
+              这一天没有观看记录
             </li>
           )}
-          {animes.map((anime) => {
-            const checked = selected.has(anime.id);
-            const displayName = anime.nameCn || anime.name || '(未命名)';
-            return (
-              <li key={anime.id}>
-                <label className="calendar-view__quick-item">
-                  <input
-                    type="checkbox"
-                    value={anime.id}
-                    checked={checked}
-                    onChange={handleCheckboxChange}
-                  />
-                  <span className="calendar-view__quick-item-name">
-                    {displayName}
-                  </span>
-                  <span className="calendar-view__quick-item-progress">
-                    {anime.watchedEpisodes} /{' '}
-                    {anime.totalEpisodes > 0 ? anime.totalEpisodes : '?'}
-                  </span>
-                </label>
-              </li>
-            );
-          })}
+          {daySummaries.map((summary) => (
+            <li key={summary.animeId}>
+              <button
+                type="button"
+                className="calendar-view__history-item"
+                onClick={() => {
+                  onAnimeClick(summary.animeId);
+                  onClose();
+                }}
+              >
+                <DayHistoryCover cover={summary.cover} animeId={summary.animeId} name={summary.animeName} />
+                <span className="calendar-view__quick-item-name">
+                  {summary.animeName}
+                </span>
+                <span className="calendar-view__quick-item-progress">
+                  {summary.netCount > 0 ? `+${summary.netCount} 集` : `${summary.netCount} 集`}
+                </span>
+              </button>
+            </li>
+          ))}
         </ul>
 
         <footer className="calendar-view__quick-footer">
@@ -635,19 +677,43 @@ function QuickWatchDialog(props: QuickWatchDialogProps): JSX.Element {
             className="calendar-view__quick-cancel"
             onClick={onClose}
           >
-            取消
-          </button>
-          <button
-            type="button"
-            className="calendar-view__quick-submit"
-            onClick={handleSubmit}
-            disabled={selected.size === 0}
-          >
-            记录（{selected.size}）
+            关闭
           </button>
         </footer>
       </div>
     </div>
+  );
+}
+
+/** 当日记录中的番剧封面小图 */
+function DayHistoryCover(props: { cover: string; animeId: number; name: string }): JSX.Element {
+  const { cover, animeId, name } = props;
+  const [failed, setFailed] = useState(false);
+  const palette = pickPaletteColor(animeId);
+  const showFallback = failed || !cover;
+  const fallbackChar = name.trim().length > 0 ? (Array.from(name.trim())[0] ?? '?') : '?';
+
+  if (showFallback) {
+    return (
+      <span
+        className="calendar-view__history-cover calendar-view__history-cover--fallback"
+        style={{ backgroundColor: palette.bg, color: palette.text }}
+        aria-hidden="true"
+      >
+        {fallbackChar}
+      </span>
+    );
+  }
+
+  return (
+    <img
+      className="calendar-view__history-cover"
+      src={cover}
+      alt=""
+      referrerPolicy="no-referrer"
+      draggable={false}
+      onError={() => setFailed(true)}
+    />
   );
 }
 
