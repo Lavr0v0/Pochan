@@ -239,8 +239,7 @@ export function BubbleCanvas(props: BubbleCanvasProps): JSX.Element {
       //   - 距上次点击/右键 < 0.5s → 锚点保持不动（让用户连点时不会乱跑）
       //   - 距上次点击/右键 ≥ 0.5s → 启动一段 ease-in-out quintic 动画，
       //     模拟气泡在液体中的漂浮感：起步极慢、中段匀速、收尾极慢。
-      const PADDING = 0;
-      const FLOAT_AMPLITUDE = 15; // 上下浮动振幅（px）
+      const FLOAT_AMPLITUDE = 15;
       const FLOAT_PERIOD_MS = 4000;
       const DEBOUNCE_MS = 350;
       const ANIM_DURATION_BASE_MS = 2400; // 短距离动画基础时长（约 2.4 秒）
@@ -262,8 +261,8 @@ export function BubbleCanvas(props: BubbleCanvasProps): JSX.Element {
         const staleness = computeFrequencyStaleness(now, anime.addedAt, anime.watchedEpisodes, anime.initialWatchedEpisodes ?? 0);
         const r = body.circleRadius ?? 30;
 
-        const minY = PADDING + r;
-        const maxY = height - PADDING - r;
+        const minY = r;
+        const maxY = height - r;
         const targetAnchorY = minY + staleness * (maxY - minY);
 
         // 当前锚点：首次为目标位置（直接出现在该位置）
@@ -335,11 +334,11 @@ export function BubbleCanvas(props: BubbleCanvasProps): JSX.Element {
         }
 
         const phase = (animeId * 1.7) % (Math.PI * 2);
-        // staleness=1（沉底）时不浮动，越靠上浮动越明显
-        const floatScale = 1 - staleness;
+        // 在最顶部和最底部不浮动（避免被边缘截断）
+        const distFromEdge = Math.min(staleness, 1 - staleness); // 0 at edges, 0.5 at center
+        const floatScale = Math.min(1, distFromEdge * 5); // 0→0, 0.2→1, 中间全是1
         const floatOffset = Math.sin((t / FLOAT_PERIOD_MS) * Math.PI * 2 + phase) * FLOAT_AMPLITUDE * floatScale;
-        // 钳制最终位置，确保气泡不超出屏幕
-        const targetY = Math.max(r, Math.min(height - r, currentAnchor + floatOffset));
+        const targetY = currentAnchor + floatOffset;
 
         Body.setPosition(body, { x: body.position.x, y: targetY });
         Body.setVelocity(body, { x: 0, y: 0 });
