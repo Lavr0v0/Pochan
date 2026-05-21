@@ -284,10 +284,12 @@ export function CalendarView(): JSX.Element {
                 Number(parts[1]) - 1,
                 Number(parts[2]),
               );
+              // 第 1 集在开播日当天播出，第 N 集在开播日 + (N-1)*7 天播出
+              // 所以最后一集的播出日 = 开播日 + (eps-1)*7 天
               const endLocal = new Date(
                 startLocal.getFullYear(),
                 startLocal.getMonth(),
-                startLocal.getDate() + eps * 7,
+                startLocal.getDate() + (eps - 1) * 7,
               );
               const endKey = `${endLocal.getFullYear()}-${String(endLocal.getMonth() + 1).padStart(2, '0')}-${String(endLocal.getDate()).padStart(2, '0')}`;
               if (cell.dateKey > endKey) return false;

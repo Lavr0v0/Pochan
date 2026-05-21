@@ -159,23 +159,51 @@ export async function getSubject(id: number): Promise<BangumiSubject> {
 // ---------------------------------------------------------------------------
 
 /**
+ * Episodes API 返回的结构（仅取需要的字段）。
+ */
+interface EpisodesResponse {
+  total?: number;
+  data?: Array<{ airdate?: string }>;
+}
+
+/**
+ * 获取番剧正片集数信息（通过 episodes API，type=0 仅正片）。
+ *
+ * 返回 { total: 正片总集数, aired: 已播出集数 }。
+ *
+ * - total：来自 API 响应的 total 字段，代表 type=0（正片）的总条目数，
+ *   排除了 OP/ED/SP 等特殊集数。
+ * - aired：airdate <= 今天的正片集数。
+ *
+ * 失败时返回 { total: 0, aired: 0 }，不阻塞添加流程。
+ */
+export async function getEpisodeInfo(subjectId: number): Promise<{ total: number; aired: number }> {
+  const url = `${BANGUMI_BASE}/v0/episodes?subject_id=${subjectId}&type=0&limit=100`;
+  try {
+    const res = await activeFetch(url, { method: 'GET', headers: DEFAULT_HEADERS });
+    if (!res.ok) return { total: 0, aired: 0 };
+    const json = (await res.json()) as EpisodesResponse;
+    const total = json.total ?? json.data?.length ?? 0;
+    if (!json.data) return { total, aired: 0 };
+    const today = new Date().toISOString().slice(0, 10);
+    const aired = json.data.filter((ep) => ep.airdate && ep.airdate <= today).length;
+    return { total, aired };
+  } catch {
+    return { total: 0, aired: 0 }; // 失败时回退，不阻塞添加流程
+  }
+}
+
+/**
  * 获取番剧已播出的集数（通过 episodes API）。
  *
  * 调用 `GET /v0/episodes?subject_id={id}&type=0`，统计 airdate <= 今天的集数。
  * 用于新番场景：totalEpisodes 用已播出集数作为当前上限。
+ *
+ * @deprecated 请使用 getEpisodeInfo 代替，它同时返回正片总集数和已播出集数。
  */
 export async function getAiredEpisodeCount(subjectId: number): Promise<number> {
-  const url = `${BANGUMI_BASE}/v0/episodes?subject_id=${subjectId}&type=0&limit=100`;
-  try {
-    const res = await activeFetch(url, { method: 'GET', headers: DEFAULT_HEADERS });
-    if (!res.ok) return 0;
-    const json = (await res.json()) as { data?: Array<{ airdate?: string }> };
-    if (!json.data) return 0;
-    const today = new Date().toISOString().slice(0, 10);
-    return json.data.filter((ep) => ep.airdate && ep.airdate <= today).length;
-  } catch {
-    return 0; // 失败时回退到 0，不阻塞添加流程
-  }
+  const info = await getEpisodeInfo(subjectId);
+  return info.aired;
 }
 
 /**
@@ -207,9 +235,9 @@ export function inferStatus(subject: BangumiSubject): 'airing' | 'finished' | 'u
   const totalEps = (subject.total_episodes ?? 0) || (subject.eps ?? 0) || 0;
 
   if (totalEps > 0) {
-    // 有总集数：估算结束日 = 开播日 + 总集数 × 7天
+    // 有总集数：最后一集播出日 = 开播日 + (totalEps - 1) × 7天
     const startMs = new Date(airDate).getTime();
-    const endMs = startMs + totalEps * 7 * 24 * 60 * 60 * 1000;
+    const endMs = startMs + (totalEps - 1) * 7 * 24 * 60 * 60 * 1000;
     if (Date.now() >= endMs) {
       return 'finished';
     }
@@ -286,6 +314,7 @@ export function convertAirDayBack(airDay: number): number {
  * - goal：可选，老番观影目标
  * - color：可选，自定义 hex 颜色
  * - notes：可选，笔记
+ * - totalEpisodesOverride：可选，通过 episodes API 获取的正片总集数（排除 OP/ED/SP）
  */
 export interface AddAnimeFormInput {
   status: 'airing' | 'finished' | 'upcoming';
@@ -295,6 +324,7 @@ export interface AddAnimeFormInput {
   goal?: AnimeGoal;
   color?: string;
   notes?: string;
+  totalEpisodesOverride?: number;
 }
 
 /**
@@ -326,11 +356,13 @@ export function bangumiSubjectToTrackedAnime(
 
   // —— 总集数回退 ——
   const totalEpisodes =
-    typeof subject.total_episodes === 'number' && subject.total_episodes > 0
-      ? subject.total_episodes
-      : typeof subject.eps === 'number' && subject.eps > 0
-        ? subject.eps
-        : 0;
+    typeof form.totalEpisodesOverride === 'number' && form.totalEpisodesOverride > 0
+      ? form.totalEpisodesOverride
+      : typeof subject.total_episodes === 'number' && subject.total_episodes > 0
+        ? subject.total_episodes
+        : typeof subject.eps === 'number' && subject.eps > 0
+          ? subject.eps
+          : 0;
 
   // —— airDay 推断 ——
   let airDay: number | undefined = form.airDay;

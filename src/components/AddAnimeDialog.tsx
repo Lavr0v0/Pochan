@@ -39,7 +39,7 @@ import {
   BangumiError,
   bangumiSubjectToTrackedAnime,
   convertAirWeekday,
-  getAiredEpisodeCount,
+  getEpisodeInfo,
   getSubject,
   inferStatus,
   searchSubjects,
@@ -116,6 +116,8 @@ interface FormState {
   goalDeadline: string;
   /** 新番已播出集数 */
   _airedEpisodes?: number;
+  /** 通过 episodes API 获取的正片总集数（排除 OP/ED/SP） */
+  _realTotalEpisodes?: number;
 }
 
 // ---------------------------------------------------------------------------
@@ -184,17 +186,6 @@ function inferAirDay(subject: BangumiSubject): number | undefined {
     }
   }
   return undefined;
-}
-
-/** 根据 BangumiSubject 推断默认目标集数 */
-function inferTargetEpisodes(subject: BangumiSubject): number {
-  if (typeof subject.total_episodes === 'number' && subject.total_episodes > 0) {
-    return subject.total_episodes;
-  }
-  if (typeof subject.eps === 'number' && subject.eps > 0) {
-    return subject.eps;
-  }
-  return FALLBACK_TARGET_EPISODES;
 }
 
 // ---------------------------------------------------------------------------
@@ -336,11 +327,13 @@ export function AddAnimeDialog(props: AddAnimeDialogProps): JSX.Element | null {
       // 自动推断更新日
       const autoAirDay = inferAirDay(subject);
 
-      // 新番：获取已播出集数作为当前上限
-      let airedCount = 0;
-      if (autoStatus === 'airing') {
-        airedCount = await getAiredEpisodeCount(subject.id);
-      }
+      // 通过 episodes API 获取正片集数信息（排除 OP/ED/SP）
+      const episodeInfo = await getEpisodeInfo(subject.id);
+      // 如果 episodes API 返回了正片总集数，优先使用它（排除了 OP/ED）
+      // 否则回退到 subject 上的 total_episodes / eps
+      const realTotalEpisodes = episodeInfo.total > 0
+        ? episodeInfo.total
+        : (subject.total_episodes || subject.eps || 0);
 
       setSubjectStatus({ kind: 'idle' });
       setStage({ kind: 'configure', subject });
@@ -350,9 +343,10 @@ export function AddAnimeDialog(props: AddAnimeDialogProps): JSX.Element | null {
         watchedEpisodes: '0',
         airDay: autoAirDay,
         goalEnabled: false,
-        goalTarget: String(inferTargetEpisodes(subject)),
+        goalTarget: String(realTotalEpisodes > 0 ? realTotalEpisodes : FALLBACK_TARGET_EPISODES),
         goalDeadline: defaultDeadline(DEFAULT_DEADLINE_DAYS),
-        _airedEpisodes: airedCount,
+        _airedEpisodes: autoStatus === 'airing' ? episodeInfo.aired : undefined,
+        _realTotalEpisodes: realTotalEpisodes,
       });
       setSubmitError(null);
     } catch (e) {
@@ -423,6 +417,7 @@ export function AddAnimeDialog(props: AddAnimeDialogProps): JSX.Element | null {
       const formInput: AddAnimeFormInput = {
         status: form.status,
         watchedEpisodes,
+        totalEpisodesOverride: form._realTotalEpisodes,
       };
       if (form.status === 'airing' && form.airDay !== undefined) {
         formInput.airDay = form.airDay;
@@ -437,6 +432,7 @@ export function AddAnimeDialog(props: AddAnimeDialogProps): JSX.Element | null {
       const tracked = bangumiSubjectToTrackedAnime(stage.subject, formInput);
       // 设置追番状态
       tracked.watchStatus = form.watchStatus === 'completed' ? 'completed' : form.watchStatus;
+
       // 新番：totalEpisodes 用已播出集数（用于进度环/进度条显示）
       // plannedEpisodes 保留真实总集数（用于日历播出范围计算）
       if (form.status === 'airing' && form._airedEpisodes && form._airedEpisodes > 0) {
@@ -733,6 +729,10 @@ function ConfigureStage(props: ConfigureStageProps): JSX.Element {
       ? subject.name
       : '';
   const totalEpsDisplay = (() => {
+    // 优先使用 episodes API 获取的正片总集数
+    if (form._realTotalEpisodes && form._realTotalEpisodes > 0) {
+      return form._realTotalEpisodes;
+    }
     if (typeof subject.total_episodes === 'number' && subject.total_episodes > 0) {
       return subject.total_episodes;
     }
@@ -819,7 +819,7 @@ function ConfigureStage(props: ConfigureStageProps): JSX.Element {
             id="add-anime-watched"
             type="range"
             min={0}
-            max={form._airedEpisodes || (typeof subject.total_episodes === 'number' && subject.total_episodes > 0 ? subject.total_episodes : 24)}
+            max={form._airedEpisodes || form._realTotalEpisodes || (typeof subject.total_episodes === 'number' && subject.total_episodes > 0 ? subject.total_episodes : 24)}
             step={1}
             className="add-anime-dialog__slider"
             value={form.watchedEpisodes}
